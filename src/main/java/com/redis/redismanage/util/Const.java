@@ -12,5 +12,13 @@ public interface Const {
      * 文件统一编码
      */
     String CHARACTER = "UTF-8";
+    /**
+     * 默认数据库
+     */
+    int DATABASE_INDEX = 0;
+    /**
+     * redis 数据库个数
+     */
+    int REDIS_DEFAULT_DB_SIZE = 15;
 
 }
