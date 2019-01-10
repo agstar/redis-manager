@@ -1,6 +1,7 @@
 package com.redis.redismanage.util;
 
 import com.alibaba.fastjson.JSON;
+import com.redis.redismanage.model.RedisKey;
 import com.redis.redismanage.model.RedisServer;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
@@ -8,10 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +19,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.redis.redismanage.util.Const.CHARACTER;
-import static com.redis.redismanage.util.Const.REDIS_SERVER;
+import static com.redis.redismanage.util.Const.*;
 
 @Component
 @Log4j
@@ -106,7 +105,10 @@ public class RedisServerUtil {
         }
     }
 
-
+    /**
+     * 初始化redis连接
+     *
+     */
     public void initRedisConnection(RedisServer redisServer) {
         //初始化redis连接
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
@@ -116,20 +118,19 @@ public class RedisServerUtil {
         if (StringUtils.isNotBlank(redisServer.getAuth())) {
             configuration.setPassword(redisServer.getAuth());
         }
-
+        for (int i = 0; i < Const.REDIS_DEFAULT_DB_SIZE; i++) {
+            initRedisKeysCache(configuration, redisServer.getName(), i);
+        }
     }
 
-    public void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
+    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
         RedisTemplate redisTemplate = new RedisTemplate();
-
-        for (int i = 0; i < Const.REDIS_DEFAULT_DB_SIZE; i++) {
-            configuration.setDatabase(i);
-            JedisConnectionFactory factory = new JedisConnectionFactory(configuration);
-            redisTemplate.setConnectionFactory(factory);
-
-        }
-
-
+        configuration.setDatabase(dbIndex);
+        JedisConnectionFactory factory = new JedisConnectionFactory(configuration);
+        redisTemplate.setConnectionFactory(factory);
+        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
+        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
+        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
     }
 
 
