@@ -21,7 +21,6 @@ public class ServerController {
     @Autowired
     private RedisServerUtil redisServerUtil;
 
-
     /**
      * 添加一个redis服务
      *

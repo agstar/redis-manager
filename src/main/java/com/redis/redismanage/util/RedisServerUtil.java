@@ -124,13 +124,13 @@ public class RedisServerUtil {
     }
 
     private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
-        RedisTemplate redisTemplate = new RedisTemplate();
-        configuration.setDatabase(dbIndex);
-        JedisConnectionFactory factory = new JedisConnectionFactory(configuration);
-        redisTemplate.setConnectionFactory(factory);
-        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
-        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
-        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
+//        RedisTemplate redisTemplate = new RedisTemplate();
+//        configuration.setDatabase(dbIndex);
+//        JedisConnectionFactory factory = new JedisConnectionFactory(configuration);
+//        redisTemplate.setConnectionFactory(factory);
+//        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
+//        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
+//        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
     }
 
 

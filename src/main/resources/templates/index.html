@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>redis-manage</title>
+    <link type="text/css" th:href="@{plugins/element-ui/index-2.4.11.css}">
+    <script th:src="@{plugins/element-ui/index.2.4.11.js}"></script>
+    <script th:src="@{plugins/vue/vue.2.5.21.js}"></script>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header>{{head}}</el-header>
+        <el-main>{{main}}</el-main>
+    </el-container>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            head: 'headersss',
+            main: 'main'
+        }
+    })
+</script>
+</html>

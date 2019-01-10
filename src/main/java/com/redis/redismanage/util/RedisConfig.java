@@ -1,3 +1,4 @@
+/*
 package com.redis.redismanage.util;
 
 import org.springframework.cache.CacheManager;
@@ -11,28 +12,36 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+*/
 /**
  * Redis 配置.
  *
  * @author chenxinyu
- */
+ *//*
+
 public class RedisConfig {
 
-    /**
+    */
+/**
      * 从application.yml取得redis的host地址.
-     */
+     *//*
+
     private String redisHost;
 
-    /**
+    */
+/**
      * 从application.yml取得redis的端口号.
-     */
+     *//*
+
     private Integer redisPort;
 
-    /**
+    */
+/**
      * Jedis 连接工厂.
      *
      * @return 配置好的Jedis连接工厂
-     */
+     *//*
+
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration configuration =
@@ -42,7 +51,8 @@ public class RedisConfig {
 
     @Bean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory factory) {
-        /*
+        */
+/*
          * Redis 序列化器.
          *
          * RedisTemplate 默认的系列化类是 JdkSerializationRedisSerializer,用JdkSerializationRedisSerializer序列化的话,
@@ -51,7 +61,8 @@ public class RedisConfig {
          * Jackson2JsonRedisSerializer 和 GenericJackson2JsonRedisSerializer，两者都能系列化成 json，
          * 但是后者会在 json 中加入 @class 属性，类的全路径包名，方便反系列化。前者如果存放了 List 则在反系列化的时候如果没指定
          * TypeReference 则会报错 java.util.LinkedHashMap cannot be cast to
-         */
+         *//*
+
         RedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
         RedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -77,4 +88,4 @@ public class RedisConfig {
         return builder.build();
     }
 
-}
+}*/
