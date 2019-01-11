@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -124,13 +125,13 @@ public class RedisServerUtil {
     }
 
     private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
-//        RedisTemplate redisTemplate = new RedisTemplate();
-//        configuration.setDatabase(dbIndex);
-//        JedisConnectionFactory factory = new JedisConnectionFactory(configuration);
-//        redisTemplate.setConnectionFactory(factory);
-//        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
-//        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
-//        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
+        RedisTemplate redisTemplate = new RedisTemplate();
+        configuration.setDatabase(dbIndex);
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
+        redisTemplate.setConnectionFactory(factory);
+        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
+        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
+        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
     }
 
 
