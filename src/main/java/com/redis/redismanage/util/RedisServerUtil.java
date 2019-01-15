@@ -32,17 +32,14 @@ public class RedisServerUtil {
      */
     private static String serverPath = "server/redisServer.json";
     private static Resource resource = new ClassPathResource(serverPath);
-    @Autowired
-    private IdWorker idWorker;
 
     /**
      * 将redisServer写入到文件中
      *
      * @author star
      */
-    public synchronized void addServer(RedisServer redisServer) {
+    public static synchronized void addServer(RedisServer redisServer) {
         try {
-            redisServer.setId(idWorker.nextId());
             REDIS_SERVER.add(redisServer);
             File file = resource.getFile();
             initRedisConnection(redisServer);
@@ -56,7 +53,7 @@ public class RedisServerUtil {
         }
     }
 
-    public synchronized void deleteServer(Long id) {
+    public static synchronized void deleteServer(Long id) {
         try {
             boolean remove = REDIS_SERVER.removeIf(x -> x.getId().equals(id));
             if (remove) {
@@ -72,7 +69,7 @@ public class RedisServerUtil {
         }
     }
 
-    public synchronized void updateServer(Long id, RedisServer redisServer) {
+    public static synchronized void updateServer(Long id, RedisServer redisServer) {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getId().equals(id)).findFirst();
         if (first.isPresent()) {
             RedisServer oldRedisServer = first.get();
@@ -85,7 +82,7 @@ public class RedisServerUtil {
 
     }
 
-    public Set<RedisServer> getAllServer() {
+    public static Set<RedisServer> getAllServer() {
         return REDIS_SERVER;
     }
 
@@ -108,9 +105,8 @@ public class RedisServerUtil {
 
     /**
      * 初始化redis连接
-     *
      */
-    public void initRedisConnection(RedisServer redisServer) {
+    public static void initRedisConnection(RedisServer redisServer) {
         //初始化redis连接
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(redisServer.getHost());
@@ -124,7 +120,7 @@ public class RedisServerUtil {
         }
     }
 
-    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
+    private static void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
         RedisTemplate redisTemplate = new RedisTemplate();
         configuration.setDatabase(dbIndex);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
