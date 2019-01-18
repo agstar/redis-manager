@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>redis-manage</title>
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <link type="text/css" th:href="@{plugins/element-ui/index-2.4.11.css}"
-          href="../static/plugins/element-ui/index.2.4.11.css">
+    <!--<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">-->
+
+    <link rel="stylesheet" href="../static/plugins/element-ui/index.2.4.11.css"
+          th:href="@{plugins/element-ui/index.2.4.11.css}">
     <style>
         .el-header {
             background-color: #B3C0D1;
@@ -140,23 +141,23 @@
         </el-container>
     </el-container>
     <el-dialog title="添加redis" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+        <el-form :model="server">
             <el-form-item label="连接名称" :label-width="formLabelWidth">
-                <el-input v-model="form.name" autocomplete="off"></el-input>
+                <el-input v-model="server.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="host" :label-width="formLabelWidth">
-                <el-input v-model="form.host" autocomplete="off"></el-input>
+                <el-input v-model="server.host" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="端口" :label-width="formLabelWidth">
-                <el-input v-model="form.port" type="number" autocomplete="off"></el-input>
+                <el-input v-model="server.port" type="number" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="密码" :label-width="formLabelWidth">
-                <el-input v-model="form.auth" autocomplete="off"></el-input>
+                <el-input v-model="server.auth" autocomplete="off"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button>测试连接</el-button>
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button type="success">测试连接</el-button>
+            <el-button type="primary" @click="addServer">确 定</el-button>
             <el-button @click="dialogFormVisible = false">取 消</el-button>
         </div>
     </el-dialog>
@@ -164,7 +165,7 @@
 </body>
 <script th:src="@{plugins/vue/vue.2.5.21.js}" src="../static/plugins/vue/vue.2.5.21.js"></script>
 <script th:src="@{plugins/element-ui/index.2.4.11.js}" src="../static/plugins/element-ui/index.2.4.11.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="../static/plugins/axios/axios.min.js" th:src="@{plugins/axios/axios.min.js}"></script>
 <script>
     var vm = new Vue({
         el: "#app",
@@ -178,27 +179,38 @@
             viewTypeItem: ['JSON', 'TEXT'],
             keyType: 'string',
             dialogFormVisible: false,
-            form: {
+            server: {
                 name: '',
-                region: '',
-                date1: '',
-                date2: '',
-                delivery: false,
-                type: [],
-                resource: '',
-                desc: ''
+                host: '',
+                port: 6379,
+                auth: ''
             },
             formLabelWidth: '120px'
         },
         methods: {
             addServer() {
-                axios.get('/user?ID=12345')
-                    .then(function (response) {
+                var $this = this;
+                axios.post('/server', this.server)
+                    .then(function () {
+                        $this.$message({
+                            message: response.message,
+                            type: response.flag ? 'success' : 'error'
+                        });
                         console.log(response);
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
+                dialogFormVisible = false;
+                // this.clearServer();
+            },
+            clearServer() {
+                this.server = {
+                    name: '',
+                    host: '',
+                    port: 6379,
+                    auth: ''
+                }
             }
         }
     })

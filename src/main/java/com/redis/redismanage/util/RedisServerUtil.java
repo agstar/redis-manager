@@ -9,10 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -27,6 +29,8 @@ import static com.redis.redismanage.util.Const.*;
 @Component
 @Log4j
 public class RedisServerUtil {
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
     /**
      * 存储redis server的文件
      */
@@ -38,7 +42,7 @@ public class RedisServerUtil {
      *
      * @author star
      */
-    public static synchronized void addServer(RedisServer redisServer) {
+    public synchronized void addServer(RedisServer redisServer) {
         try {
             REDIS_SERVER.add(redisServer);
             File file = resource.getFile();
@@ -106,7 +110,7 @@ public class RedisServerUtil {
     /**
      * 初始化redis连接
      */
-    public static void initRedisConnection(RedisServer redisServer) {
+    public void initRedisConnection(RedisServer redisServer) {
         //初始化redis连接
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(redisServer.getHost());
@@ -120,12 +124,14 @@ public class RedisServerUtil {
         }
     }
 
-    private static void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
-        RedisTemplate redisTemplate = new RedisTemplate();
+    private  void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
         configuration.setDatabase(dbIndex);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
-        redisTemplate.setConnectionFactory(factory);
-        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(redisTemplate);
+        factory.afterPropertiesSet();
+
+        stringRedisTemplate.setConnectionFactory(factory);
+
+        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(stringRedisTemplate);
         CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
         REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
     }

@@ -4,15 +4,14 @@ import com.redis.redismanage.entity.Result;
 import com.redis.redismanage.entity.StatusCode;
 import com.redis.redismanage.model.RedisKey;
 import com.redis.redismanage.model.RedisServer;
-import com.redis.redismanage.util.Const;
-import org.springframework.data.redis.connection.DataType;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.redis.redismanage.util.Const.*;
@@ -27,7 +26,7 @@ public class KeyController {
         return null;
     }
 
-    @GetMapping("server")
+    @GetMapping("key")
     public Result getServerMenu() {
         Map<String, Map<String, List>> maps = new LinkedHashMap<>();
         for (RedisServer redisServer : REDIS_SERVER) {
