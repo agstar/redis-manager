@@ -1,10 +1,12 @@
 package com.redis.redismanage.util;
 
 import com.redis.redismanage.model.RedisKey;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +15,10 @@ public class ConvertUtil {
     @SuppressWarnings("unchecked")
     public static List<RedisKey> getRedisKeyList(StringRedisTemplate stringRedisTemplate) {
         stringRedisTemplate.afterPropertiesSet();
+        DefaultRedisScript<String> redisScript = new DefaultRedisScript<String>();
+        redisScript.setScriptText("info");
+        //scan 0 MATCH * COUNT 10000
+        Object execute = stringRedisTemplate.execute(redisScript, new ArrayList<>(), "");
         Set<String> keys = stringRedisTemplate.keys("*");
 
         List<RedisKey> redisKeyList = new ArrayList<>();

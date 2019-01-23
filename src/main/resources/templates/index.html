@@ -191,17 +191,17 @@
             addServer() {
                 var $this = this;
                 axios.post('/server', this.server)
-                    .then(function () {
+                    .then(function (response) {
                         $this.$message({
-                            message: response.message,
-                            type: response.flag ? 'success' : 'error'
+                            message: response.data.message,
+                            type: response.data.flag ? 'success' : 'error'
                         });
                         console.log(response);
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
-                dialogFormVisible = false;
+                $this.dialogFormVisible = false;
                 // this.clearServer();
             },
             clearServer() {
@@ -211,6 +211,21 @@
                     port: 6379,
                     auth: ''
                 }
+            },
+            getKeys(){
+                var $this = this;
+                axios.post('/key', this.server)
+                    .then(function (res) {
+                        $this.$message({
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
+                        });
+                        console.log(res);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                $this.dialogFormVisible = false;
             }
         }
     })
