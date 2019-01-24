@@ -13,7 +13,7 @@ import java.util.Set;
 public class RedisController {
 
     @Autowired
-    RedisServerUtil redisServerUtil;
+    private RedisServerUtil redisServerUtil;
 
     /**
      * 添加一个redis服务

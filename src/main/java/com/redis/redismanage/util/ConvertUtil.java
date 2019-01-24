@@ -14,11 +14,10 @@ public class ConvertUtil {
 
     @SuppressWarnings("unchecked")
     public static List<RedisKey> getRedisKeyList(StringRedisTemplate stringRedisTemplate) {
-        stringRedisTemplate.afterPropertiesSet();
         DefaultRedisScript<String> redisScript = new DefaultRedisScript<String>();
-        redisScript.setScriptText("info");
-        //scan 0 MATCH * COUNT 10000
-        Object execute = stringRedisTemplate.execute(redisScript, new ArrayList<>(), "");
+//        redisScript.setScriptText("info");
+
+//        Object execute = stringRedisTemplate.execute(redisScript, new ArrayList<>(), "");
         Set<String> keys = stringRedisTemplate.keys("*");
 
         List<RedisKey> redisKeyList = new ArrayList<>();

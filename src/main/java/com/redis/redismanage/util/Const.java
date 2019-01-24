@@ -2,17 +2,16 @@ package com.redis.redismanage.util;
 
 import com.redis.redismanage.model.RedisKey;
 import com.redis.redismanage.model.RedisServer;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public interface Const {
 
     Set<RedisServer> REDIS_SERVER = new LinkedHashSet<>();
     Map<String, CopyOnWriteArrayList<RedisKey>> REDIS_KEYS_LISTMAP = new HashMap<>();
+    Map<String, StringRedisTemplate> REDIS_TEMPLATE_MAP = new HashMap<>();
     /**
      * 文件统一编码
      */

@@ -29,8 +29,8 @@ import static com.redis.redismanage.util.Const.*;
 @Component
 @Log4j
 public class RedisServerUtil {
-    @Autowired
-    StringRedisTemplate stringRedisTemplate;
+//    @Autowired
+
     /**
      * 存储redis server的文件
      */
@@ -124,16 +124,17 @@ public class RedisServerUtil {
         }
     }
 
-    private  void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
+    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
         configuration.setDatabase(dbIndex);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
         factory.afterPropertiesSet();
-
+        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(factory);
-
+        stringRedisTemplate.afterPropertiesSet();
         List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(stringRedisTemplate);
         CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
         REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
+        REDIS_TEMPLATE_MAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, stringRedisTemplate);
     }
 
 

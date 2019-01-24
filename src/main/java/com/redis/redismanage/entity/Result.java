@@ -27,4 +27,12 @@ public class Result {
         this.code = code;
         this.message = message;
     }
+
+    public static Result success(String msg) {
+        return new Result(true, StatusCode.OK, msg);
+    }
+
+    public static Result success() {
+        return new Result(true, StatusCode.OK, "查询成功");
+    }
 }
