@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public interface Const {
 
     Set<RedisServer> REDIS_SERVER = new LinkedHashSet<>();
-    Map<String, CopyOnWriteArrayList<RedisKey>> REDIS_KEYS_LISTMAP = new HashMap<>();
+    Map<String, Integer> REDIS_KEYS_LISTMAP = new HashMap<>();
     Map<String, StringRedisTemplate> REDIS_TEMPLATE_MAP = new HashMap<>();
     /**
      * 文件统一编码

@@ -13,23 +13,25 @@ import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.redis.redismanage.util.Const.*;
 
 @Component
 @Log4j
 public class RedisServerUtil {
-//    @Autowired
+    //    @Autowired
+    private Pattern pattern = Pattern.compile("keys=(\\d*)");
 
     /**
      * 存储redis server的文件
@@ -119,22 +121,37 @@ public class RedisServerUtil {
         if (StringUtils.isNotBlank(redisServer.getAuth())) {
             configuration.setPassword(redisServer.getAuth());
         }
-        for (int i = 0; i < Const.REDIS_DEFAULT_DB_SIZE; i++) {
-            initRedisKeysCache(configuration, redisServer.getName(), i);
-        }
+        initRedisKeysCache(configuration, redisServer.getName());
     }
 
-    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName, int dbIndex) {
-        configuration.setDatabase(dbIndex);
+    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName) {
+        configuration.setDatabase(0);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
         factory.afterPropertiesSet();
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(factory);
         stringRedisTemplate.afterPropertiesSet();
-        List<RedisKey> redisKeyList = ConvertUtil.getRedisKeyList(stringRedisTemplate);
-        CopyOnWriteArrayList<RedisKey> redisKeys = new CopyOnWriteArrayList<>(redisKeyList);
-        REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, redisKeys);
-        REDIS_TEMPLATE_MAP.put(serverName + DEFAULT_SEPARATOR + dbIndex, stringRedisTemplate);
+        List<RedisKey> redisKeyList;
+        Map<String, Object> keycount = stringRedisTemplate.execute((RedisCallback<Map<String, Object>>) redisConnection -> {
+            Properties info = redisConnection.info();
+            //keys=37,expires=0,avg_ttl=0
+            String keyspace = info.getProperty("db1");
+            for (int i = 0; i < 16; i++) {
+                String keys = info.getProperty("db" + i);
+                int keyCount = 0;
+                if (keys != null) {
+                    Matcher matcher = pattern.matcher(keys);
+                    String keyCountStr = matcher.group(1);
+                    keyCount = Integer.parseInt(keyCountStr);
+                }
+                REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + i, keyCount);
+                REDIS_TEMPLATE_MAP.put(serverName + DEFAULT_SEPARATOR + i, stringRedisTemplate);
+            }
+            Map<String, Object> map = new HashMap<>();
+            return map;
+        });
+
+
     }
 
 

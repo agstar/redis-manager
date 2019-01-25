@@ -1,22 +1,25 @@
 package com.redis.redismanage.util;
 
 import com.redis.redismanage.model.RedisKey;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ConvertUtil {
+    private Pattern pattern = Pattern.compile("keys=(\\d*)");
 
     @SuppressWarnings("unchecked")
     public static List<RedisKey> getRedisKeyList(StringRedisTemplate stringRedisTemplate) {
-        DefaultRedisScript<String> redisScript = new DefaultRedisScript<String>();
-//        redisScript.setScriptText("info");
-
+        Map<String, Object> keycount = stringRedisTemplate.execute((RedisCallback<Map<String, Object>>) redisConnection -> {
+            Properties info = redisConnection.info();
+            //keys=37,expires=0,avg_ttl=0
+            String keyspace = info.getProperty("db1");
+            Map<String, Object> map = new HashMap<>();
+            return map;
+        });
 //        Object execute = stringRedisTemplate.execute(redisScript, new ArrayList<>(), "");
         Set<String> keys = stringRedisTemplate.keys("*");
 
@@ -29,5 +32,18 @@ public class ConvertUtil {
         });
         return redisKeyList;
     }
+
+
+    public static void main(String[] args) {
+        Pattern pattern = Pattern.compile("keys=(\\d*)");
+        String str="keys=37,expires=0,avg_ttl=0";
+        Matcher matcher = pattern.matcher(str);
+        if(matcher.find()){
+            System.out.println(matcher.group());
+            System.out.println(matcher.group(0));
+            System.out.println(matcher.group(1));
+        }
+    }
+
 
 }
