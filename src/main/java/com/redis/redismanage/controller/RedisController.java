@@ -7,13 +7,11 @@ import com.redis.redismanage.util.RedisServerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import static com.redis.redismanage.util.Const.REDIS_SERVER;
 
 @RestController
 public class RedisController {
 
-    @Autowired
-    private RedisServerUtil redisServerUtil;
 
     /**
      * 添加一个redis服务
@@ -22,7 +20,7 @@ public class RedisController {
      */
     @PostMapping("server")
     public Result addServer(@RequestBody RedisServer redisServer) {
-        redisServerUtil.addServer(redisServer);
+        RedisServerUtil.addServer(redisServer);
         return new Result(true, StatusCode.OK, "添加成功");
     }
 
@@ -40,8 +38,7 @@ public class RedisController {
 
     @GetMapping("server")
     public Result getAllServer() {
-        Set<RedisServer> allServer = RedisServerUtil.getAllServer();
-        return new Result(true, StatusCode.OK, "修改成功", allServer);
+        return new Result(true, StatusCode.OK, "查询成功", REDIS_SERVER);
     }
 
 }

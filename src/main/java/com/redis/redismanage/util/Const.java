@@ -11,6 +11,7 @@ public interface Const {
 
     Set<RedisServer> REDIS_SERVER = new LinkedHashSet<>();
     Map<String, Integer> REDIS_KEYS_LISTMAP = new HashMap<>();
+    Map<String,List<Integer>> REDIS_KEY_COUNT = new HashMap<>();
     Map<String, StringRedisTemplate> REDIS_TEMPLATE_MAP = new HashMap<>();
     /**
      * 文件统一编码

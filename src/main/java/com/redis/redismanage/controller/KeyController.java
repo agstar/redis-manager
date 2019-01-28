@@ -2,10 +2,8 @@ package com.redis.redismanage.controller;
 
 import com.redis.redismanage.entity.Result;
 import com.redis.redismanage.entity.StatusCode;
-import com.redis.redismanage.model.RedisKey;
 import com.redis.redismanage.model.RedisServer;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
+import com.redis.redismanage.util.RedisServerUtil;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
@@ -14,8 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.redis.redismanage.util.Const.*;
 
@@ -31,8 +31,7 @@ public class KeyController {
         Set<Object> keys = stringRedisTemplate.execute((RedisCallback<Set<Object>>) redisConnection -> {
             Set<Object> binaryKeys = new HashSet<>();
             Cursor<byte[]> cursor = redisConnection.scan(build);
-            Properties info = redisConnection.info();
-
+            //Properties info = redisConnection.info();
             while (cursor.hasNext()) {
                 binaryKeys.add(new String(cursor.next()));
             }
@@ -41,19 +40,16 @@ public class KeyController {
         return new Result(true, StatusCode.OK, "查询成功", keys);
     }
 
-    @GetMapping("key")
-    public Result getServerMenu() {
-        Map<String, Map<String, List>> maps = new LinkedHashMap<>();
-        for (RedisServer redisServer : REDIS_SERVER) {
-            Map<String, List> map = new HashMap<>();
-            for (int i = 0; i < 16; i++) {
-                String key = redisServer.getName() + DEFAULT_SEPARATOR + i;
-                CopyOnWriteArrayList<RedisKey> redisKeyList = REDIS_KEYS_LISTMAP.get(key);
-                map.put("db" + i + "(" + redisKeyList.size() + ")", redisKeyList);
-            }
-            maps.put(redisServer.getName(), map);
+
+    @GetMapping("key/{serverName}")
+    public Result getKeyCount(@PathVariable("serverName") String serverName) {
+        Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
+        if (first.isPresent()) {
+            List<Integer> count = RedisServerUtil.initRedisConnection(first.get());
+            return new Result(true, StatusCode.OK, "查询成功", count);
+        } else {
+            return new Result(false, StatusCode.ERROR, "未找到" + serverName);
         }
-        return new Result(true, StatusCode.OK, "查询成功", maps);
     }
 
 

@@ -11,5 +11,6 @@ public class RedisManageApplication {
         SpringApplication.run(RedisManageApplication.class, args);
         //读取所有redis
         RedisServerUtil.readAllServer();
+        RedisServerUtil.initKeyCount();
     }
 }

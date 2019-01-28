@@ -31,7 +31,7 @@ import static com.redis.redismanage.util.Const.*;
 @Log4j
 public class RedisServerUtil {
     //    @Autowired
-    private Pattern pattern = Pattern.compile("keys=(\\d*)");
+    private static final Pattern pattern = Pattern.compile("keys=(\\d*)");
 
     /**
      * 存储redis server的文件
@@ -44,11 +44,11 @@ public class RedisServerUtil {
      *
      * @author star
      */
-    public synchronized void addServer(RedisServer redisServer) {
+    public static synchronized void addServer(RedisServer redisServer) {
         try {
             REDIS_SERVER.add(redisServer);
             File file = resource.getFile();
-            initRedisConnection(redisServer);
+            //initRedisConnection(redisServer);
             String json = FileUtils.readFileToString(file, CHARACTER);
             if (StringUtils.isNotBlank(json)) {
                 json = JSON.toJSONString(REDIS_SERVER);
@@ -110,9 +110,22 @@ public class RedisServerUtil {
     }
 
     /**
+     * 初始化加载所有key数量
+     *
+     * @author rcl
+     * @date 2019/1/28 9:40
+     */
+    public static void initKeyCount() {
+        for (RedisServer redisServer : REDIS_SERVER) {
+            List<Integer> count = RedisServerUtil.initRedisConnection(redisServer);
+            REDIS_KEY_COUNT.put(redisServer.getName(), count);
+        }
+    }
+
+    /**
      * 初始化redis连接
      */
-    public void initRedisConnection(RedisServer redisServer) {
+    public static List<Integer> initRedisConnection(RedisServer redisServer) {
         //初始化redis连接
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(redisServer.getHost());
@@ -121,21 +134,22 @@ public class RedisServerUtil {
         if (StringUtils.isNotBlank(redisServer.getAuth())) {
             configuration.setPassword(redisServer.getAuth());
         }
-        initRedisKeysCache(configuration, redisServer.getName());
+        return initRedisKeysCache(configuration);
     }
 
-    private void initRedisKeysCache(RedisStandaloneConfiguration configuration, String serverName) {
+    private static List<Integer> initRedisKeysCache(RedisStandaloneConfiguration configuration) {
         configuration.setDatabase(0);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
         factory.afterPropertiesSet();
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(factory);
         stringRedisTemplate.afterPropertiesSet();
-        List<RedisKey> redisKeyList;
-        Map<String, Object> keycount = stringRedisTemplate.execute((RedisCallback<Map<String, Object>>) redisConnection -> {
+
+        return stringRedisTemplate.execute((RedisCallback<List<Integer>>) redisConnection -> {
             Properties info = redisConnection.info();
             //keys=37,expires=0,avg_ttl=0
-            String keyspace = info.getProperty("db1");
+            // String keyspace = info.getProperty("db1");
+            List<Integer> keyCountList = new ArrayList<>(16);
             for (int i = 0; i < 16; i++) {
                 String keys = info.getProperty("db" + i);
                 int keyCount = 0;
@@ -144,14 +158,11 @@ public class RedisServerUtil {
                     String keyCountStr = matcher.group(1);
                     keyCount = Integer.parseInt(keyCountStr);
                 }
-                REDIS_KEYS_LISTMAP.put(serverName + DEFAULT_SEPARATOR + i, keyCount);
-                REDIS_TEMPLATE_MAP.put(serverName + DEFAULT_SEPARATOR + i, stringRedisTemplate);
+                keyCountList.add(keyCount);
             }
-            Map<String, Object> map = new HashMap<>();
-            return map;
+
+            return keyCountList;
         });
-
-
     }
 
 
