@@ -23,11 +23,11 @@
 <div id="app">
     <el-container style="height: 950px; border: 1px solid #eee">
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-            <el-menu>
-                <el-submenu :index="index" v-for="(value,key,index) in serverKeys" v-index="index">
-                    <template slot="title"><i class="el-icon-message"></i>{{key}}</template>
-                    <el-menu-item :index="index+'-'+itemIndex" v-for="(itemValue,itemIndex) in value"
-                                  v-index="itemIndex">{{itemValue}}
+            <el-menu @open="handleOpen" @select="handleSelect">
+                <el-submenu :index="index+''" v-for="(server,index) in serverList" :key="index">
+                    <template slot="title"><i class="el-icon-message"></i>{{server.name}}</template>
+                    <el-menu-item :index="index+'-'+itemIndex" v-for="(itemValue,itemIndex) in server.serverKeys"
+                                  :key="itemIndex">{{itemValue}}
                     </el-menu-item>
                 </el-submenu>
             </el-menu>
@@ -38,7 +38,6 @@
                 <el-button type="primary">删除redis</el-button>
                 <el-button type="primary">修改redis</el-button>
             </el-header>
-
             <el-main>
                 <el-form>
                     <el-row :gutter="20">
@@ -133,6 +132,7 @@
 <script th:src="@{plugins/element-ui/index.2.4.11.js}" src="../static/plugins/element-ui/index.2.4.11.js"></script>
 <script src="../static/plugins/axios/axios.min.js" th:src="@{plugins/axios/axios.min.js}"></script>
 <script>
+
     var vm = new Vue({
         el: "#app",
         data: {
@@ -155,6 +155,13 @@
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: []
+        },
+        created() {
+            console.log('created')
+        },
+        mounted() {
+            console.log('mounted')
+            this.getServer();
         },
         methods: {
             addServer() {
@@ -185,8 +192,13 @@
                 var $this = this;
                 axios.get('/server', this.server)
                     .then(function (response) {
+                        // $this.serverList = response.data.data;
                         $this.serverList = response.data.data;
-                        $this.$set($this.serverList, 'showEditBtn', true);
+                        console.log(response.data.data);
+                        $this.serverList.forEach(function (item) {
+                            $this.$set(item, 'serverKeys', true);
+                            $this.$set(item, 'firstOpen', true);
+                        });
                         $this.$message({
                             message: response.data.message,
                             type: response.data.flag ? 'success' : 'error'
@@ -199,12 +211,13 @@
                 $this.dialogFormVisible = false;
                 // this.clearServer();
             },
-            getKeys(servername) {
+            getKey(server) {
                 var $this = this;
                 axios.get('/key', this.server)
                     .then(function (res) {
                         if (res.data.flag) {
                             $this.serverKeys = res.data.data;
+                            $this.$set($this.serverKeys, 'serverKeys', true);
                         }
                         $this.$message({
                             message: res.data.message,
@@ -216,7 +229,39 @@
                         console.log(error);
                     });
                 $this.dialogFormVisible = false;
+            },
+            getKeyCount(server) {
+                var $this = this;
+                axios.get('/keyCount/' + server.name)
+                    .then(function (res) {
+                        if (res.data.flag) {
+                            server['serverKeys'] = res.data.data;
+                            server['firstOpen'] = false;
+                        }
+                        $this.$message({
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
+                        });
+                        console.log(res);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                $this.dialogFormVisible = false;
+            },
+            handleOpen(index, indexPath) {
+                console.log('open---' + index + '---' + indexPath)
+                var server = this.serverList[index];
+                var firstOpen = server['firstOpen'];
+                if (firstOpen) {
+                    this.getKeyCount(server)
+                }
+
+            },
+            handleSelect(index, indexPath) {
+                console.log('select-->' + index + '---' + indexPath)
             }
+
         }
     })
 </script>

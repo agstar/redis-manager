@@ -134,6 +134,7 @@ public class RedisServerUtil {
         if (StringUtils.isNotBlank(redisServer.getAuth())) {
             configuration.setPassword(redisServer.getAuth());
         }
+
         return initRedisKeysCache(configuration);
     }
 
@@ -144,7 +145,7 @@ public class RedisServerUtil {
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(factory);
         stringRedisTemplate.afterPropertiesSet();
-
+        factory.getConnection().close();
         return stringRedisTemplate.execute((RedisCallback<List<Integer>>) redisConnection -> {
             Properties info = redisConnection.info();
             //keys=37,expires=0,avg_ttl=0
@@ -155,12 +156,14 @@ public class RedisServerUtil {
                 int keyCount = 0;
                 if (keys != null) {
                     Matcher matcher = pattern.matcher(keys);
-                    String keyCountStr = matcher.group(1);
-                    keyCount = Integer.parseInt(keyCountStr);
+                    if(matcher.find()){
+                        String keyCountStr = matcher.group(1);
+                        keyCount = Integer.parseInt(keyCountStr);
+                    }
+
                 }
                 keyCountList.add(keyCount);
             }
-
             return keyCountList;
         });
     }
