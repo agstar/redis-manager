@@ -26,8 +26,8 @@
             <el-menu @open="handleOpen" @select="handleSelect">
                 <el-submenu :index="index+''" v-for="(server,index) in serverList" :key="index">
                     <template slot="title"><i class="el-icon-message"></i>{{server.name}}</template>
-                    <el-menu-item :index="index+'-'+itemIndex" v-for="(itemValue,itemIndex) in server.serverKeys"
-                                  :key="itemIndex">{{itemValue}}
+                    <el-menu-item :index="server.name+'-'+itemIndex" v-for="(itemValue,itemIndex) in server.serverKeys"
+                                  :key="itemIndex">{{'db'+itemIndex+' ('+itemValue+')'}}
                     </el-menu-item>
                 </el-submenu>
             </el-menu>
@@ -259,7 +259,11 @@
 
             },
             handleSelect(index, indexPath) {
-                console.log('select-->' + index + '---' + indexPath)
+                var dbindex = index.substring(index.lastIndexOf('-'));
+                var serverName = index.substring(0, index.lastIndexOf('-'));
+                console.log('select-->' + index + '---' + indexPath);
+                console.log('select dbindex-->' + dbindex + '<--->' + serverName)
+
             }
 
         }
