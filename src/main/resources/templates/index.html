@@ -24,11 +24,19 @@
     <el-container style="height: 950px; border: 1px solid #eee">
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
             <el-menu @open="handleOpen" @select="handleSelect">
-                <el-submenu :index="index+''" v-for="(server,index) in serverList" :key="index">
+                <el-submenu :index="serverIndex+''" v-for="(server,serverIndex) in serverList" :key="serverIndex">
                     <template slot="title"><i class="el-icon-message"></i>{{server.name}}</template>
-                    <el-menu-item :index="server.name+'-'+itemIndex" v-for="(itemValue,itemIndex) in server.serverKeys"
-                                  :key="itemIndex">{{'db'+itemIndex+' ('+itemValue+')'}}
-                    </el-menu-item>
+                    <template v-for="(keyCount,dbIndex) in server.dbList">
+                        <el-menu-item v-if="keyCount==0" :index="index+'-'+server.name+'-'+dbIndex" :key="dbIndex">
+                            {{'db'+dbIndex+' ('+keyCount+')'}}
+                        </el-menu-item>
+                        <el-submenu v-if="keyCount>0" :index="index+'-'+server.name+'-'+itemIndex" :key="dbIndex">
+                            <template slot="title">{{'db'+dbIndex+' ('+keyCount+')'}}</template>
+                            <el-menu-item :index="index+'-'+server.name+'-'+dbIndex+'-'+key" v-for="key in keys"
+                                          :key="key">{{key}}
+                            </el-menu-item>
+                        </el-submenu>
+                    </template>
                 </el-submenu>
             </el-menu>
         </el-aside>
@@ -132,8 +140,7 @@
 <script th:src="@{plugins/element-ui/index.2.4.11.js}" src="../static/plugins/element-ui/index.2.4.11.js"></script>
 <script src="../static/plugins/axios/axios.min.js" th:src="@{plugins/axios/axios.min.js}"></script>
 <script>
-
-    var vm = new Vue({
+    const vm = new Vue({
         el: "#app",
         data: {
             head: 'headersss',
@@ -165,7 +172,7 @@
         },
         methods: {
             addServer() {
-                var $this = this;
+                let $this = this;
                 axios.post('/server', this.server)
                     .then(function (response) {
                         $this.$message({
@@ -189,14 +196,15 @@
                 }
             },
             getServer() {
-                var $this = this;
+                let $this = this;
                 axios.get('/server', this.server)
                     .then(function (response) {
                         // $this.serverList = response.data.data;
                         $this.serverList = response.data.data;
+                        console.log('----------getServer-------------');
                         console.log(response.data.data);
                         $this.serverList.forEach(function (item) {
-                            $this.$set(item, 'serverKeys', true);
+                            $this.$set(item, 'dbList', []);
                             $this.$set(item, 'firstOpen', true);
                         });
                         $this.$message({
@@ -211,7 +219,7 @@
                 $this.dialogFormVisible = false;
                 // this.clearServer();
             },
-            getKey(server) {
+            /*getKey(server) {
                 var $this = this;
                 axios.get('/key', this.server)
                     .then(function (res) {
@@ -229,13 +237,31 @@
                         console.log(error);
                     });
                 $this.dialogFormVisible = false;
+            },*/
+            getKey(servername, dbIndex) {
+                let $this = this;
+                axios.get(`/key/${servername}/${dbIndex}`, this.server)
+                    .then(function (res) {
+                        if (res.data.flag) {
+                            $this.serverKeys = res.data.data;
+
+                        }
+
+                        console.log(res);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             },
             getKeyCount(server) {
-                var $this = this;
+                let $this = this;
                 axios.get('/keyCount/' + server.name)
                     .then(function (res) {
                         if (res.data.flag) {
-                            server['serverKeys'] = res.data.data;
+                            server['dbList'] = res.data.data;
+                            server['dbList'].forEach(function (item) {
+                                $this.$set(item, 'keys', []);
+                            });
                             server['firstOpen'] = false;
                         }
                         $this.$message({
@@ -250,17 +276,24 @@
                 $this.dialogFormVisible = false;
             },
             handleOpen(index, indexPath) {
-                console.log('open---' + index + '---' + indexPath)
-                var server = this.serverList[index];
-                var firstOpen = server['firstOpen'];
-                if (firstOpen) {
-                    this.getKeyCount(server)
+                console.log('open---' + index + '---' + indexPath);
+                if (index.indexOf('-') > -1) {
+                    //open---10.216.115.188-1---1,10.216.115.188-1
+
+                    this.getKey()
+                } else {
+                    let server = this.serverList[index];
+                    console.log(JSON.stringify(server));
+                    let firstOpen = server['firstOpen'];
+                    if (firstOpen) {
+                        this.getKeyCount(server)
+                    }
                 }
 
             },
             handleSelect(index, indexPath) {
-                var dbindex = index.substring(index.lastIndexOf('-'));
-                var serverName = index.substring(0, index.lastIndexOf('-'));
+                let dbindex = index.substring(index.lastIndexOf('-'));
+                let serverName = index.substring(0, index.lastIndexOf('-'));
                 console.log('select-->' + index + '---' + indexPath);
                 console.log('select dbindex-->' + dbindex + '<--->' + serverName)
 
