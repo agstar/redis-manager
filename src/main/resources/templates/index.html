@@ -146,7 +146,7 @@
             aside: 'Aside',
             keyName: 'redisKey',
             value: 'asdfffffffffffffffffjkalsjdklfjaskldjfkljasdkljfklasjdklfjklsjdkfljklsadjfkljsdfjas' +
-            'djfkjsdkfjlskajdflsjdlfjlskdjflkajsdfkljslkdjflksjdflkjsdlkjflkasdjflkjasdkfjlkasdjflkjasdlkf',
+                'djfkjsdkfjlskajdflsjdlfjlskdjflkajsdfkljslkdjflksjdflkjsdlkjflkasdjflkjasdkfjlkasdjflkjasdlkf',
             viewType: 'JSON',
             viewTypeItem: ['JSON', 'TEXT'],
             keyType: 'string',
@@ -192,6 +192,28 @@
                     port: 6379,
                     auth: ''
                 }
+            },
+            testConnection() {
+                let $this = this;
+                axios.get('/testConnection', this.server)
+                    .then((response) => {
+                        // $this.serverList = response.data.data;
+                        $this.serverList = response.data.data;
+                        console.log('----------getServer-------------');
+                        console.log(response.data.data);
+                        $this.serverList.forEach(function (item) {
+                            $this.$set(item, 'dbList', []);
+                            $this.$set(item, 'firstOpen', true);
+                        });
+                        $this.$message({
+                            message: response.data.message,
+                            type: response.data.flag ? 'success' : 'error'
+                        });
+                        console.log(response);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             },
             getServer() {
                 let $this = this;
@@ -273,11 +295,11 @@
                     });
                 $this.dialogFormVisible = false;
             },
+
             handleOpen(index, indexPath) {
                 console.log('open---' + index + '---' + indexPath);
                 if (index.indexOf('-') > -1) {
                     //open---10.216.115.188-1---1,10.216.115.188-1
-
                     this.getKey()
                 } else {
                     let server = this.serverList[index];

@@ -45,7 +45,7 @@ public class KeyController {
     public Result getKey(@PathVariable("serverName") String serverName) {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
-            List<Integer> count = RedisServerUtil.initRedisConnection(first.get());
+            List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
             return new Result(true, StatusCode.OK, "查询成功", count);
         } else {
             return new Result(false, StatusCode.ERROR, "未找到" + serverName);
@@ -56,7 +56,7 @@ public class KeyController {
     public Result getKeyCount(@PathVariable("serverName") String serverName) {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
-            List<Integer> count = RedisServerUtil.initRedisConnection(first.get());
+            List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
             return new Result(true, StatusCode.OK, "查询成功", count);
         } else {
             return new Result(false, StatusCode.ERROR, "未找到" + serverName);
