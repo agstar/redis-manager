@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.redis</groupId>
-    <artifactId>redis-manage</artifactId>
+    <artifactId>redis-manager</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>redis-manage</name>
+    <name>redis-manager</name>
     <description>A redis management tool for web</description>
 
     <properties>
