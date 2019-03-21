@@ -5,9 +5,10 @@ import com.redis.redismanage.entity.StatusCode;
 import com.redis.redismanage.model.RedisServer;
 import com.redis.redismanage.util.RedisServerUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sun.swing.StringUIClientPropertyKey;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static com.redis.redismanage.util.Const.REDIS_SERVER;
 
@@ -26,6 +27,7 @@ public class RedisController {
         return new Result(true, StatusCode.OK, "添加成功");
     }
 
+    @PostMapping("testConnection")
     public Result testConnection(@RequestBody RedisServer redisServer) {
         String ping = RedisServerUtil.ping(redisServer);
         if (StringUtils.equalsIgnoreCase(ping, "pong")) {
@@ -50,7 +52,8 @@ public class RedisController {
 
     @GetMapping("server")
     public Result getAllServer() {
-        return new Result(true, StatusCode.OK, "查询成功", REDIS_SERVER);
+        Set<RedisServer> serverSet = new LinkedHashSet<>(REDIS_SERVER);
+        serverSet.forEach(x -> x.setAuth(""));
+        return new Result(true, StatusCode.OK, "查询成功", serverSet);
     }
-
 }

@@ -21,7 +21,7 @@ import static com.redis.redismanage.util.Const.*;
 
 @RestController
 public class KeyController {
-    private ScanOptions build = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
+    private static final ScanOptions build = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
 
     @GetMapping("key/{serverName}/{dbIndex}")
     public Result getKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex) {
