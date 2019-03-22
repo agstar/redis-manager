@@ -1,4 +1,4 @@
-package com.redis.redismanage.entity;
+package com.redis.manage.entity;
 
 /**
  * * 状态码实体类

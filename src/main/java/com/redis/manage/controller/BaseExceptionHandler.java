@@ -1,7 +1,7 @@
-package com.redis.redismanage.controller;
+package com.redis.manage.controller;
 
-import com.redis.redismanage.entity.Result;
-import com.redis.redismanage.entity.StatusCode;
+import com.redis.manage.entity.Result;
+import com.redis.manage.entity.StatusCode;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;

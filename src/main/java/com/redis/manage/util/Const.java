@@ -1,11 +1,9 @@
-package com.redis.redismanage.util;
+package com.redis.manage.util;
 
-import com.redis.redismanage.model.RedisKey;
-import com.redis.redismanage.model.RedisServer;
+import com.redis.manage.model.RedisServer;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public interface Const {
 

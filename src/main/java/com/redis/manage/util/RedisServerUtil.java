@@ -1,38 +1,33 @@
-package com.redis.redismanage.util;
+package com.redis.manage.util;
 
 import com.alibaba.fastjson.JSON;
-import com.redis.redismanage.model.RedisKey;
-import com.redis.redismanage.model.RedisServer;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.redis.manage.model.RedisServer;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.redis.redismanage.util.Const.*;
+import static com.redis.manage.util.Const.*;
 
 @Component
 @Log4j
 public class RedisServerUtil {
-    //    @Autowired
-    private static final Pattern pattern = Pattern.compile("keys=(\\d*)");
+    private static final Pattern PATTERN = Pattern.compile("keys=(\\d*)");
 
     /**
      * 存储redis server的文件
@@ -161,7 +156,7 @@ public class RedisServerUtil {
                 String keys = info.getProperty("db" + i);
                 int keyCount = 0;
                 if (keys != null) {
-                    Matcher matcher = pattern.matcher(keys);
+                    Matcher matcher = PATTERN.matcher(keys);
                     if (matcher.find()) {
                         String keyCountStr = matcher.group(1);
                         keyCount = Integer.parseInt(keyCountStr);
@@ -182,7 +177,32 @@ public class RedisServerUtil {
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
 
+    public static JSONObject getKeyTree(String key) {
+        JSONObject json = new JSONObject();
+        String[] array = key.split(":");
+        json.put("label", array[0]);
+        if (array.length != 1) {
+            JSONArray childrens = (JSONArray) json.getOrDefault("children", new JSONArray());
+            json.put("children", childrens);
+            int lastIndex = array.length - 1;
+            for (int i = 1; i < array.length; i++) {
+                String s = array[i];
+                JSONObject temp = new JSONObject();
+                if (i != lastIndex) {
+                    temp.put("label", s);
+                    childrens.add(temp);
+                    JSONArray tempArray = new JSONArray();
+                    temp.put("children", tempArray);
+                    childrens = (JSONArray) temp.get("children");
+                } else {
+                    temp.put("label", key);
+                    childrens.add(temp);
+                }
+            }
+        }
+        return json;
     }
 
 

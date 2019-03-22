@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" >
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>redis-manage</title>
@@ -28,15 +28,15 @@
                 <el-submenu :index="serverIndex+''" v-for="(server,serverIndex) in serverList" :key="serverIndex">
                     <template slot="title"><i class="el-icon-message"></i>{{server.name}}</template>
                     <template v-for="(keyCount,dbIndex) in server.dbList">
-                        <el-menu-item v-if="keyCount==0" :index="index+'-'+server.name+'-'+dbIndex" :key="dbIndex">
+                        <el-menu-item :index="server.name+'-'+dbIndex+'-'+keyCount" :key="dbIndex">
                             {{'db'+dbIndex+' ('+keyCount+')'}}
                         </el-menu-item>
-                        <el-submenu v-if="keyCount>0" :index="index+'-'+server.name+'-'+itemIndex" :key="dbIndex">
+                        <!--<el-submenu v-if="keyCount>0" :index="index+'-'+server.name+'-'+itemIndex" :key="dbIndex">
                             <template slot="title">{{'db'+dbIndex+' ('+keyCount+')'}}</template>
-                            <el-menu-item :index="index+'-'+server.name+'-'+dbIndex+'-'+key" v-for="key in keys"
+                            &lt;!&ndash;<el-menu-item :index="index+'-'+server.name+'-'+dbIndex+'-'+key" v-for="key in keys"
                                           :key="key">{{key}}
-                            </el-menu-item>
-                        </el-submenu>
+                            </el-menu-item>&ndash;&gt;
+                        </el-submenu>-->
                     </template>
                 </el-submenu>
             </el-menu>
@@ -50,7 +50,8 @@
             <el-main>
                 <el-row :gutter="20" style="height: 100%;overflow-y: scroll">
                     <el-col :span="4">
-                        <el-tree :data="keys" :props="defaultProps" check-on-click-node  @node-click="handleNodeClick"></el-tree>
+                        <el-tree :data="keys" :props="defaultProps" check-on-click-node
+                                 @node-click="handleNodeClick"></el-tree>
                     </el-col>
                     <el-col :span="20">
                         <el-form>
@@ -111,7 +112,7 @@
                             <el-input type="textarea" v-model="value" rows="15"></el-input>
                         </el-row>
                         <el-row>
-                            <el-button style="float:right;">Save</el-button>
+                            <el-button type="primary" style="float:right;">Save</el-button>
                         </el-row>
                         <el-row>
                             <el-input type="textarea" v-model="value" rows="15"></el-input>
@@ -176,780 +177,6 @@
                         label: '三级 1-1-1'
                     }]
                 }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 1',
-                children: [{
-                    label: '二级 1-1',
-                    children: [{
-                        label: '三级 1-1-1'
-                    }]
-                }]
-            }, {
-                label: '一级 2',
-                children: [{
-                    label: '二级 2-1',
-                    children: [{
-                        label: '三级 2-1-1'
-                    }]
-                }, {
-                    label: '二级 2-2',
-                    children: [{
-                        label: '三级 2-2-1'
-                    }]
-                }]
-            }, {
-                label: '一级 3',
-                children: [{
-                    label: '二级 3-1',
-                    children: [{
-                        label: '三级 3-1-1'
-                    }]
-                }, {
-                    label: '二级 3-2',
-                    children: [{
-                        label: '三级 3-2-1'
-                    }]
-                }]
             }],
             defaultProps: {
                 children: 'children',
@@ -968,10 +195,9 @@
         },
         methods: {
             addServer() {
-                let $this = this;
                 axios.post('/server', this.server)
-                    .then(function (response) {
-                        $this.$message({
+                    .then((response) => {
+                        this.$message({
                             message: response.data.message,
                             type: response.data.flag ? 'success' : 'error'
                         });
@@ -980,10 +206,10 @@
                             this.serverList.push(this.server)
                         }
                     })
-                    .catch(function (error) {
+                    .catch((error) => {
                         console.log(error);
                     });
-                $this.dialogFormVisible = false;
+                this.dialogFormVisible = false;
                 // this.clearServer();
             },
             clearServer() {
@@ -1002,7 +228,7 @@
                             type: response.data.flag ? 'success' : 'error'
                         });
                     })
-                    .catch(function (error) {
+                    .catch((error) => {
                         console.log(error);
                         this.$message({
                             message: error,
@@ -1011,74 +237,66 @@
                     });
             },
             getServer() {
-                let $this = this;
                 axios.get('/server', this.server)
-                    .then(function (response) {
-                        // $this.serverList = response.data.data;
-                        $this.serverList = response.data.data;
+                    .then((response) => {
+                        // this.serverList = response.data.data;
+                        this.serverList = response.data.data;
                         console.log('----------getServer-------------');
                         console.log(response.data.data);
-                        $this.serverList.forEach(function (item) {
-                            $this.$set(item, 'dbList', []);
-                            $this.$set(item, 'firstOpen', true);
+                        this.serverList.forEach((item) => {
+                            this.$set(item, 'dbList', []);
+                            this.$set(item, 'firstOpen', true);
                         });
-                        $this.$message({
+                        this.$message({
                             message: response.data.message,
                             type: response.data.flag ? 'success' : 'error'
                         });
                         console.log(response);
                     })
-                    .catch(function (error) {
+                    .catch((error) => {
                         console.log(error);
                     });
-                $this.dialogFormVisible = false;
+                this.dialogFormVisible = false;
                 // this.clearServer();
             },
             getKey(servername, dbIndex) {
-                let $this = this;
                 axios.get(`/key/${servername}/${dbIndex}`, this.server)
-                    .then(function (res) {
+                    .then((res) => {
                         if (res.data.flag) {
-                            $this.serverKeys = res.data.data;
-
+                            this.keys = res.data.data;
                         }
-
                         console.log(res);
                     })
-                    .catch(function (error) {
+                    .catch((error) => {
                         console.log(error);
                     });
             },
             getKeyCount(server) {
-                let $this = this;
                 axios.get('/keyCount/' + server.name)
-                    .then(function (res) {
+                    .then((res) => {
                         if (res.data.flag) {
                             server['dbList'] = res.data.data;
-                            server['dbList'].forEach(function (item) {
-                                $this.$set(item, 'keys', []);
-                            });
                             server['firstOpen'] = false;
                         }
-                        $this.$message({
+                        this.$message({
                             message: res.data.message,
                             type: res.data.flag ? 'success' : 'error'
                         });
                         console.log(res);
                     })
-                    .catch(function (error) {
+                    .catch((error) => {
                         console.log(error);
                     });
-                $this.dialogFormVisible = false;
+                this.dialogFormVisible = false;
             },
 
             handleOpen(index, indexPath) {
-                console.log('open---' + index + '---' + indexPath);
+                console.log('open--->' + index + '<--->' + indexPath);
                 if (index.indexOf('-') > -1) {
                     //open---10.216.115.188-1---1,10.216.115.188-1
-                    this.getKey()
+                    //this.getKey()
                 } else {
-                    let server = this.serverList[index];
+                    let server = this.serverList[parseInt(index)];
                     console.log(JSON.stringify(server));
                     let firstOpen = server['firstOpen'];
                     if (firstOpen) {
@@ -1088,12 +306,16 @@
 
             },
             handleSelect(index, indexPath) {
-                let indexs = index.split('');
+
+                let indexs = index.split('-');
+                console.log('index--' + indexs.length + '<---->' + indexs)
                 if (indexs.length === 3) {
-                    let dbindex = index.substring(index.lastIndexOf('-'));
-                    let serverName = index.substring(0, index.lastIndexOf('-'));
+                    let keyCount = indexs[2];
+                    let dbindex = indexs[1];
+                    let serverName = indexs[0];
                     console.log('select-->' + index + '---' + indexPath);
-                    console.log('select dbindex-->' + dbindex + '<--->' + serverName)
+                    console.log('select dbindex-->' + dbindex + '<--->' + serverName);
+                    this.getKey(serverName, dbindex);
                 }
 
 

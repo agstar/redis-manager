@@ -1,4 +1,4 @@
-package com.redis.redismanage.entity;
+package com.redis.manage.entity;
 
 import lombok.Getter;
 import lombok.Setter;

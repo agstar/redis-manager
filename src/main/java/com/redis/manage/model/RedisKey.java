@@ -1,4 +1,4 @@
-package com.redis.redismanage.model;
+package com.redis.manage.model;
 
 import lombok.Getter;
 import lombok.Setter;

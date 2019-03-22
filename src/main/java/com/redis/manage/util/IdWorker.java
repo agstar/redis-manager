@@ -1,4 +1,4 @@
-package com.redis.redismanage.util;
+package com.redis.manage.util;
 
 import org.springframework.stereotype.Component;
 

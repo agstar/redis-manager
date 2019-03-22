@@ -1,6 +1,6 @@
-package com.redis.redismanage.util;
+package com.redis.manage.util;
 
-import com.redis.redismanage.model.RedisKey;
+import com.redis.manage.model.RedisKey;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 

@@ -1,16 +1,16 @@
-package com.redis.redismanage.controller;
+package com.redis.manage.controller;
 
-import com.redis.redismanage.entity.Result;
-import com.redis.redismanage.entity.StatusCode;
-import com.redis.redismanage.model.RedisServer;
-import com.redis.redismanage.util.RedisServerUtil;
+import com.redis.manage.entity.Result;
+import com.redis.manage.entity.StatusCode;
+import com.redis.manage.model.RedisServer;
+import com.redis.manage.util.RedisServerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.redis.redismanage.util.Const.REDIS_SERVER;
+import static com.redis.manage.util.Const.REDIS_SERVER;
 
 @RestController
 public class RedisController {
