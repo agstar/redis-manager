@@ -25,7 +25,6 @@
         }
 
         html, body, #app {
-
             height: 100%;
         }
     </style>
@@ -41,31 +40,25 @@
                         <el-menu-item :index="server.name+'-'+dbIndex+'-'+keyCount" :key="dbIndex">
                             {{'db'+dbIndex+' ('+keyCount+')'}}
                         </el-menu-item>
-                        <!--<el-submenu v-if="keyCount>0" :index="index+'-'+server.name+'-'+itemIndex" :key="dbIndex">
-                            <template slot="title">{{'db'+dbIndex+' ('+keyCount+')'}}</template>
-                            &lt;!&ndash;<el-menu-item :index="index+'-'+server.name+'-'+dbIndex+'-'+key" v-for="key in keys"
-                                          :key="key">{{key}}
-                            </el-menu-item>&ndash;&gt;
-                        </el-submenu>-->
                     </template>
                 </el-submenu>
             </el-menu>
         </el-aside>
-        <el-container>
+        <el-container style="height: 100%;">
             <el-header style="text-align: right; font-size: 12px">
                 <el-button type="primary" @click="dialogFormVisible = true">添加redis</el-button>
                 <el-button type="primary">删除redis</el-button>
                 <el-button type="primary">修改redis</el-button>
             </el-header>
-            <el-main>
+            <el-main style="height: 100%;">
                 <el-row :gutter="20" style="height: 100%;">
                     <el-col :span="4" style="height: 100%;overflow: auto">
                         <el-tree :data="keys" :props="defaultProps" check-on-click-node
                                  @node-click="handleNodeClick"></el-tree>
                     </el-col>
-                    <el-col :span="20">
+                    <el-col :span="20" style="height: 100%;overflow: auto">
                         <el-form>
-                            <el-row :gutter="20">
+                            <el-row :gutter="10">
                                 <el-col :span="12">
                                     <el-form-item :label="keyType.toUpperCase()+':'">
                                         <el-col :span="18">
@@ -119,14 +112,14 @@
                             </el-col>
                         </el-row>
                         <el-row>
-                            <el-input type="textarea" v-model="value" rows="15"></el-input>
+                            <el-input rows="15" type="textarea" v-model="value"></el-input>
                         </el-row>
-                        <el-row>
-                            <el-button type="primary" style="float:right;">Save</el-button>
+                        <el-row style="margin-top: 20px;">
+                            <el-button type="primary" style="position: relative;right:0;">Save</el-button>
                         </el-row>
-                        <el-row>
-                            <el-input type="textarea" v-model="value" rows="15"></el-input>
-                        </el-row>
+                        <!-- <el-row style="height: 30%;">
+                             <el-input rows="8" type="textarea" v-model="value"></el-input>
+                         </el-row>-->
                     </el-col>
                 </el-row>
             </el-main>
@@ -1089,7 +1082,6 @@
 
             },
             handleSelect(index, indexPath) {
-
                 let indexs = index.split('-');
                 console.log('index--' + indexs.length + '<---->' + indexs)
                 if (indexs.length === 3) {

@@ -119,14 +119,15 @@ public class RedisServerUtil {
     }
 
     public static List<Integer> getRedisKeyCount(RedisServer redisServer) {
-        StringRedisTemplate stringRedisTemplate = RedisServerUtil.initRedisConnection(redisServer);
+        StringRedisTemplate stringRedisTemplate = RedisServerUtil.initRedisConnection(redisServer, 0);
         return initRedisKeysCache(stringRedisTemplate);
     }
 
     /**
      * 初始化redis连接
      */
-    public static StringRedisTemplate initRedisConnection(RedisServer redisServer) {
+    public static StringRedisTemplate initRedisConnection(RedisServer redisServer, int dbIndex) {
+
         //初始化redis连接
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(redisServer.getHost());
@@ -135,7 +136,7 @@ public class RedisServerUtil {
         if (StringUtils.isNotBlank(redisServer.getAuth())) {
             configuration.setPassword(redisServer.getAuth());
         }
-        configuration.setDatabase(0);
+        configuration.setDatabase(dbIndex);
         LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
         factory.afterPropertiesSet();
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
@@ -172,7 +173,7 @@ public class RedisServerUtil {
     public static String ping(RedisServer redisServer) {
         //初始化redis连接
         try {
-            StringRedisTemplate stringRedisTemplate = initRedisConnection(redisServer);
+            StringRedisTemplate stringRedisTemplate = initRedisConnection(redisServer, 0);
             return stringRedisTemplate.execute(RedisConnectionCommands::ping);
         } catch (Exception e) {
             return e.getMessage();

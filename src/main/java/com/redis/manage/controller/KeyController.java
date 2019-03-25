@@ -24,6 +24,14 @@ public class KeyController {
     @GetMapping("key/{serverName}/{dbIndex}")
     public Result getKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex) {
         StringRedisTemplate stringRedisTemplate = REDIS_TEMPLATE_MAP.get(serverName + DEFAULT_SEPARATOR + dbIndex);
+        if (stringRedisTemplate == null) {
+            Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
+            if (first.isPresent()) {
+                stringRedisTemplate = RedisServerUtil.initRedisConnection(first.get(), dbIndex);
+            } else {
+                return new Result(false, StatusCode.ERROR, "没有对应的服务");
+            }
+        }
         //scan 0 MATCH * COUNT 10000
         //加载初始化 template，点击server加载template
         Set<String> keys = stringRedisTemplate.execute((RedisCallback<Set<String>>) redisConnection -> {
