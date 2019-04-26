@@ -180,6 +180,65 @@ public class RedisServerUtil {
         }
     }
 
+
+    public static JSONArray getKeyTree(String key, JSONArray jsonArray, String serverName, int dbIndex) {
+        String index = serverName + ":" + dbIndex;
+        JSONArray temp = jsonArray;
+        String[] array = key.split(":");
+        JSONObject jsonObj = new JSONObject();
+        boolean hasRepeate = false;
+        for (Object o : jsonArray) {
+            JSONObject json = (JSONObject) o;
+            if (json.get("label").equals(array[0])) {
+                hasRepeate = true;
+                jsonObj = json;
+                break;
+            }
+        }
+        if (!hasRepeate) {
+            jsonObj.put("label", array[0]);
+            jsonObj.put("index", index);
+            jsonArray.add(jsonObj);
+        }
+        if (array.length != 1) {
+            JSONArray childrens = (JSONArray) jsonObj.getOrDefault("children", new JSONArray());
+            jsonObj.put("children", childrens);
+            int lastIndex = array.length - 1;
+            for (int i = 1; i < array.length; i++) {
+                String s = array[i];
+                //不是最后一个
+                if (i != lastIndex) {
+                    boolean hasChildRepeate = false;
+                    for (Object o : childrens) {
+                        JSONObject json = (JSONObject) o;
+                        if (json.get("label").equals(s)) {
+                            hasChildRepeate = true;
+                            jsonObj = json;
+                            break;
+                        }
+                    }
+                    if (!hasChildRepeate) {
+                        jsonObj = new JSONObject();
+                        jsonObj.put("label", s);
+                        jsonObj.put("index",index );
+                        childrens.add(jsonObj);
+                        jsonObj.put("children", new JSONArray());
+                        childrens = jsonObj.getJSONArray("children");
+                    } else {
+                        childrens = jsonObj.getJSONArray("children");
+                    }
+                } else {
+                    jsonObj = new JSONObject();
+                    jsonObj.put("label", key);
+                    jsonObj.put("index",index );
+                    childrens.add(jsonObj);
+                    jsonArray = temp;
+                }
+            }
+        }
+        return jsonArray;
+    }
+
     public static JSONObject getKeyTree(String key) {
         JSONObject json = new JSONObject();
         String[] array = key.split(":");

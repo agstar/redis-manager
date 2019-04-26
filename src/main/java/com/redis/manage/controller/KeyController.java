@@ -1,5 +1,6 @@
 package com.redis.manage.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.redis.manage.entity.Result;
 import com.redis.manage.entity.StatusCode;
@@ -43,11 +44,11 @@ public class KeyController {
             }
             return binaryKeys;
         });
-        List<JSONObject> list = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray();
         if (keys != null) {
-            keys.forEach(x -> list.add(RedisServerUtil.getKeyTree(x)));
+            keys.forEach(x -> RedisServerUtil.getKeyTree(x, jsonArray, serverName, dbIndex));
         }
-        return new Result(true, StatusCode.OK, "查询成功", list);
+        return new Result(true, StatusCode.OK, "查询成功", jsonArray);
     }
 
 

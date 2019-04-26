@@ -20,8 +20,7 @@ public class RedisManageApplicationTests {
         String[] keys = {"a:b:c:d", "a:b:c", "a:b:c:e", "a:b:d:d"};
         JSONArray json = new JSONArray();
         for (String s : keys) {
-            JSONArray keyTree2 = getKeyTree2(s, json);
-            json = keyTree2;
+            json = getKeyTree2(s, json);
         }
 
         System.out.println(json.toString());
