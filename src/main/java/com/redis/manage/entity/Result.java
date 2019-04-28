@@ -5,34 +5,69 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Result {
+public class Result<T> {
 
     private boolean flag;
     private Integer code;
     private String message;
-    private Object data;
+    private T data;
 
-    public Result() {
+    private Result() {
     }
 
-    public Result(boolean flag, Integer code, String message, Object data) {
+    private Result(boolean flag, Integer code) {
+        this.flag = flag;
+        this.code = code;
+    }
+
+
+    private Result(boolean flag, Integer code, String message) {
+        this.flag = flag;
+        this.code = code;
+        this.message = message;
+    }
+
+    private Result(boolean flag, Integer code, String message, T data) {
         this.flag = flag;
         this.code = code;
         this.message = message;
         this.data = data;
     }
 
-    public Result(boolean flag, Integer code, String message) {
+    private Result(boolean flag, Integer code, T data) {
         this.flag = flag;
         this.code = code;
-        this.message = message;
+        this.data = data;
     }
 
-    public static Result success(String msg) {
-        return new Result(true, StatusCode.OK, msg);
+
+    public static <T> Result<T> success() {
+        return new Result<>(true, StatusCode.OK);
     }
 
-    public static Result success() {
-        return new Result(true, StatusCode.OK, "查询成功");
+    public static <T> Result<T> successMsg(String message) {
+        return new Result<>(true, StatusCode.OK, message);
+    }
+
+    public static <T> Result<T> success(T data) {
+        return new Result<>(true, StatusCode.OK, data);
+    }
+
+    public static <T> Result<T> success(String message, T data) {
+        return new Result<>(true, StatusCode.OK, message, data);
+    }
+    public static <T> Result<T> error() {
+        return new Result<>(false, StatusCode.ERROR);
+    }
+    public static <T> Result<T> errorCode(Integer code) {
+        return new Result<>(false, code);
+    }
+
+    public static <T> Result<T> errorMsg(String message) {
+        return new Result<>(false, StatusCode.ERROR, message);
+    }
+
+    public static <T> Result<T> error(Integer code, String message) {
+        return new Result<>(false, code, message);
     }
 }

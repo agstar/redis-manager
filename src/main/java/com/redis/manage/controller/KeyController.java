@@ -1,9 +1,7 @@
 package com.redis.manage.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.redis.manage.entity.Result;
-import com.redis.manage.entity.StatusCode;
 import com.redis.manage.model.RedisServer;
 import com.redis.manage.util.RedisServerUtil;
 import org.springframework.data.redis.connection.DataType;
@@ -31,7 +29,7 @@ public class KeyController {
             if (first.isPresent()) {
                 stringRedisTemplate = RedisServerUtil.initRedisConnection(first.get(), dbIndex);
             } else {
-                return new Result(false, StatusCode.ERROR, "没有对应的服务");
+                return Result.errorMsg("没有对应的服务");
             }
         }
         //scan 0 MATCH * COUNT 10000
@@ -48,7 +46,7 @@ public class KeyController {
         if (keys != null) {
             keys.forEach(x -> RedisServerUtil.getKeyTree(x, jsonArray, serverName, dbIndex));
         }
-        return new Result(true, StatusCode.OK, "查询成功", jsonArray);
+        return Result.success("查询成功", jsonArray);
     }
 
 
@@ -60,50 +58,42 @@ public class KeyController {
             if (first.isPresent()) {
                 stringRedisTemplate = RedisServerUtil.initRedisConnection(first.get(), dbIndex);
             } else {
-                return new Result(false, StatusCode.ERROR, "没有对应的服务");
+                return Result.errorMsg("没有对应的服务");
             }
         }
         DataType type = stringRedisTemplate.type(keyName);
-
+        Map<String, Object> map = new HashMap<>();
+        map.put("datatype", type);
+        map.put("key", keyName);
         if (type != null) {
             switch (type) {
                 case SET:
-                    stringRedisTemplate.opsForValue().get(keyName);
+                    String s1 = stringRedisTemplate.opsForValue().get(keyName);
+                    map.put("value", s1);
                     break;
                 case HASH:
                     Map<Object, Object> entries = stringRedisTemplate.opsForHash().entries(keyName);
+                    map.put("value", entries);
                     break;
                 case LIST:
                     List<String> range = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
+                    map.put("value", range);
                     break;
                 case STRING:
                     String s = stringRedisTemplate.opsForValue().get(keyName);
+                    map.put("value", s);
                     break;
                 case NONE:
                     break;
                 case ZSET:
                     Set<String> range1 = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
+                    map.put("value", range1);
                     break;
                 default:
                     break;
             }
         }
-
-        //加载初始化 template，点击server加载template
-        Set<String> keys = stringRedisTemplate.execute((RedisCallback<Set<String>>) redisConnection -> {
-            Set<String> binaryKeys = new HashSet<>();
-            Cursor<byte[]> cursor = redisConnection.scan(SCAN_OPTIONS);
-            //Properties info = redisConnection.info();
-            while (cursor.hasNext()) {
-                binaryKeys.add(new String(cursor.next()));
-            }
-            return binaryKeys;
-        });
-        List<JSONObject> list = new ArrayList<>();
-        if (keys != null) {
-            keys.forEach(x -> list.add(RedisServerUtil.getKeyTree(x)));
-        }
-        return new Result(true, StatusCode.OK, "查询成功", list);
+        return Result.success(map);
     }
 
 
@@ -112,9 +102,9 @@ public class KeyController {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
             List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
-            return new Result(true, StatusCode.OK, "查询成功", count);
+            return Result.success("查询成功", count);
         } else {
-            return new Result(false, StatusCode.ERROR, "未找到" + serverName);
+            return Result.errorMsg("未找到" + serverName);
         }
     }
 
@@ -123,9 +113,9 @@ public class KeyController {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
             List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
-            return new Result(true, StatusCode.OK, "查询成功", count);
+            return Result.success("查询成功", count);
         } else {
-            return new Result(false, StatusCode.ERROR, "未找到" + serverName);
+            return Result.errorMsg("未找到" + serverName);
         }
     }
 

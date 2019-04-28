@@ -171,6 +171,7 @@
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: [],
+            result: {dataType: null, key: null, value: null},
             keys: [{
                 label: '一级 1',
                 index: '1-1',
@@ -187,9 +188,7 @@
                 children: 'children',
                 label: 'label'
             },
-            handleNodeClick(data) {
-                console.log(data);
-            }
+
         },
         created() {
             console.log('created')
@@ -264,11 +263,25 @@
                 this.dialogFormVisible = false;
                 // this.clearServer();
             },
-            getKey(servername, dbIndex) {
-                axios.get(`/key/${servername}/${dbIndex}`, this.server)
+            getKeyList(servername, dbIndex) {
+                axios.get(`/key/${servername}/${dbIndex}`)
                     .then((res) => {
                         if (res.data.flag) {
                             this.keys = res.data.data;
+                        }
+                        console.log(res);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            },
+            getKey(servername, dbIndex, keyName) {
+                axios.get(`/key/${servername}/${dbIndex}/${keyName}`)
+                    .then((res) => {
+                        if (res.data.flag) {
+                            this.result.dataType = res.data.data.dataType;
+                            this.result.value = res.data.data.value;
+                            console.log(this.result.value);
                         }
                         console.log(res);
                     })
@@ -319,10 +332,16 @@
                     let serverName = indexs[0];
                     console.log('select-->' + index + '---' + indexPath);
                     console.log('select dbindex-->' + dbindex + '<--->' + serverName);
-                    //this.getKey(serverName, dbindex);
+                    this.getKeyList(serverName, dbindex);
                 }
-
-
+            },
+            handleNodeClick(data) {
+                console.log(data);
+                var index = data.index;
+                var serverName = index.substr(0, index.lastIndexOf(":"));
+                var dbIndex = index.substr(index.lastIndexOf(":") + 1);
+                var key = data.label;
+                this.getKey(serverName, dbIndex, key);
             }
         }
     })
