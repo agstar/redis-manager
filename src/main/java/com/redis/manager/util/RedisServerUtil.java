@@ -1,14 +1,16 @@
-package com.redis.manage.util;
+package com.redis.manager.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.redis.manage.model.RedisServer;
+import com.redis.manager.model.RedisKey;
+import com.redis.manager.model.RedisServer;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -22,8 +24,11 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.redis.manage.util.Const.*;
+import static com.redis.manager.util.Const.*;
 
+/**
+ * @author agstar
+ */
 @Component
 @Log4j
 public class RedisServerUtil {
@@ -44,7 +49,6 @@ public class RedisServerUtil {
         try {
             REDIS_SERVER.add(redisServer);
             File file = resource.getFile();
-            //initRedisConnection(redisServer);
             String json = FileUtils.readFileToString(file, CHARACTER);
             if (StringUtils.isNotBlank(json)) {
                 json = JSON.toJSONString(REDIS_SERVER);
@@ -127,22 +131,27 @@ public class RedisServerUtil {
      * 初始化redis连接
      */
     public static StringRedisTemplate initRedisConnection(RedisServer redisServer, int dbIndex) {
-
-        //初始化redis连接
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redisServer.getHost());
-        configuration.setDatabase(Const.DATABASE_INDEX);
-        configuration.setPort(redisServer.getPort());
-        if (StringUtils.isNotBlank(redisServer.getAuth())) {
-            configuration.setPassword(redisServer.getAuth());
+        StringRedisTemplate stringRedisTemplate = null;
+        try {
+            //初始化redis连接
+            RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+            configuration.setHostName(redisServer.getHost());
+            configuration.setDatabase(Const.DATABASE_INDEX);
+            configuration.setPort(redisServer.getPort());
+            if (StringUtils.isNotBlank(redisServer.getAuth())) {
+                configuration.setPassword(redisServer.getAuth());
+            }
+            configuration.setDatabase(dbIndex);
+            LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
+            factory.afterPropertiesSet();
+            stringRedisTemplate = new StringRedisTemplate();
+            stringRedisTemplate.setConnectionFactory(factory);
+            stringRedisTemplate.afterPropertiesSet();
+            factory.getConnection().close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        configuration.setDatabase(dbIndex);
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
-        factory.afterPropertiesSet();
-        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
-        stringRedisTemplate.setConnectionFactory(factory);
-        stringRedisTemplate.afterPropertiesSet();
-        factory.getConnection().close();
         return stringRedisTemplate;
     }
 
@@ -180,10 +189,13 @@ public class RedisServerUtil {
         }
     }
 
-
-    public static JSONArray getKeyTree(String key, JSONArray jsonArray, String serverName, int dbIndex) {
+    /**
+     * 递归获取树形菜单
+     */
+    public static JSONArray getKeyTree(RedisKey redisKey, JSONArray jsonArray, String serverName, int dbIndex) {
         String index = serverName + ":" + dbIndex;
         JSONArray temp = jsonArray;
+        String key = redisKey.getKey();
         String[] array = key.split(":");
         JSONObject jsonObj = new JSONObject();
         boolean hasRepeate = false;
@@ -198,6 +210,7 @@ public class RedisServerUtil {
         if (!hasRepeate) {
             jsonObj.put("label", array[0]);
             jsonObj.put("index", index);
+            jsonObj.put("type", redisKey.getType());
             jsonArray.add(jsonObj);
         }
         if (array.length != 1) {
@@ -220,7 +233,8 @@ public class RedisServerUtil {
                     if (!hasChildRepeate) {
                         jsonObj = new JSONObject();
                         jsonObj.put("label", s);
-                        jsonObj.put("index",index );
+                        jsonObj.put("type", redisKey.getType());
+                        jsonObj.put("index", index);
                         childrens.add(jsonObj);
                         jsonObj.put("children", new JSONArray());
                         childrens = jsonObj.getJSONArray("children");
@@ -230,7 +244,8 @@ public class RedisServerUtil {
                 } else {
                     jsonObj = new JSONObject();
                     jsonObj.put("label", key);
-                    jsonObj.put("index",index );
+                    jsonObj.put("index", index);
+                    jsonObj.put("type", redisKey.getType());
                     childrens.add(jsonObj);
                     jsonArray = temp;
                 }

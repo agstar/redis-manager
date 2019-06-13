@@ -1,6 +1,6 @@
-package com.redis.manage;
+package com.redis.manager;
 
-import com.redis.manage.util.RedisServerUtil;
+import com.redis.manager.util.RedisServerUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

@@ -1,4 +1,4 @@
-package com.redis.manage.model;
+package com.redis.manager.model;
 
 import lombok.Data;
 

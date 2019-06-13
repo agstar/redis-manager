@@ -1,16 +1,16 @@
-package com.redis.manage.controller;
+package com.redis.manager.controller;
 
-import com.redis.manage.entity.Result;
-import com.redis.manage.entity.StatusCode;
-import com.redis.manage.model.RedisServer;
-import com.redis.manage.util.RedisServerUtil;
+import com.redis.manager.entity.Result;
+import com.redis.manager.entity.StatusCode;
+import com.redis.manager.util.Const;
+import com.redis.manager.util.RedisServerUtil;
 import org.apache.commons.lang3.StringUtils;
+import com.redis.manager.model.RedisServer;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.redis.manage.util.Const.REDIS_SERVER;
 
 @RestController
 public class RedisController {
@@ -27,13 +27,13 @@ public class RedisController {
         return new Result(true, StatusCode.OK, "添加成功");
     }
 
-    @PostMapping("testConnection")
+    @PostMapping("ping")
     public Result testConnection(@RequestBody RedisServer redisServer) {
-        String ping = RedisServerUtil.ping(redisServer);
-        if (StringUtils.equalsIgnoreCase(ping, "pong")) {
-            return new Result(true, StatusCode.OK, ping);
+        String pong = RedisServerUtil.ping(redisServer);
+        if (StringUtils.equalsIgnoreCase(pong, "pong")) {
+            return new Result(true, StatusCode.OK, pong);
         }
-        return new Result(false, StatusCode.ERROR, ping);
+        return new Result(false, StatusCode.ERROR, pong);
 
     }
 
@@ -52,7 +52,7 @@ public class RedisController {
 
     @GetMapping("server")
     public Result getAllServer() {
-        Set<RedisServer> serverSet = new LinkedHashSet<>(REDIS_SERVER);
+        Set<RedisServer> serverSet = new LinkedHashSet<>(Const.REDIS_SERVER);
         serverSet.forEach(x -> x.setAuth(""));
         return new Result(true, StatusCode.OK, "查询成功", serverSet);
     }

@@ -1,6 +1,6 @@
-package com.redis.manage.util;
+package com.redis.manager.util;
 
-import com.redis.manage.model.RedisServer;
+import com.redis.manager.model.RedisServer;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.*;
