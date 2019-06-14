@@ -213,8 +213,8 @@
             main: 'main',
             aside: 'Aside',
             keyName: 'redisKey',
-            value: 'asdfffffffffffffffffjkalsjdklfjaskldjfkljasdkljfklasjdklfjklsjdkfljklsadjfkljsdfjas' +
-                'djfkjsdkfjlskajdflsjdlfjlskdjflkajsdfkljslkdjflksjdflkjsdlkjflkasdjflkjasdkfjlkasdjflkjasdlkf',
+            value: '这是value',
+            dbIndex: 0,
             viewType: 'JSON',
             viewTypeItem: ['JSON', 'TEXT'],
             keyType: 'string',
@@ -229,6 +229,7 @@
             key: {
                 keyType: 'string',
                 keyName: '',
+                dbIndex: this.dbIndex,
                 KeyValue: null
             },
             formLabelWidth: '120px',
@@ -365,7 +366,6 @@
                         this.getKeyCount(server)
                     }
                 }
-
             },
             handleSelect(index, indexPath) {
                 let indexs = index.split('-');
@@ -373,6 +373,8 @@
                 if (indexs.length === 3) {
                     let keyCount = indexs[2];
                     let dbindex = indexs[1];
+                    this.dbIndex = dbindex;
+                    this.key.dbIndex = dbindex;
                     let serverName = indexs[0];
                     console.log('select-->' + index + '---' + indexPath);
                     console.log('select dbindex-->' + dbindex + '<--->' + serverName);
@@ -383,7 +385,10 @@
                 axios.get(`/key/${serverName}/${dbIndex}/${key}`)
                     .then((res) => {
                         if (res.data.flag) {
-                            this.value = res.data.data;
+                            let value = res.data.data;
+                            if (type === 'STRING') {
+                                this.value = JSON.stringify(JSON.parse(value), null, 2)
+                            }
                         }
                         this.$message({
                             message: res.data.message,
@@ -402,6 +407,7 @@
                 let serverName = index.split(":")[0];
                 let dbIndex = index.split(":")[1];
                 this.keyType = data.type;
+                this.keyName = key;
                 this.getValue(serverName, dbIndex, key, this.keyType);
             },
             addKey() {

@@ -1,7 +1,6 @@
 package com.redis.manager.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.redis.manager.entity.Result;
 import com.redis.manager.entity.StatusCode;
 import com.redis.manager.model.RedisKey;
@@ -14,7 +13,10 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.redis.manager.util.Const.*;
 
@@ -47,7 +49,7 @@ public class KeyController {
         if (keys != null) {
             keys.forEach(x -> RedisServerUtil.getKeyTree(x, jsonArray, serverName, dbIndex));
         }
-        return new Result(true, StatusCode.OK, "查询成功", jsonArray);
+        return Result.success("查询成功", jsonArray);
     }
 
     private StringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {
@@ -71,31 +73,31 @@ public class KeyController {
     public Result getKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         DataType type = stringRedisTemplate.type(keyName);
-        Object o = null;
+        Object value = null;
         if (type != null) {
             switch (type) {
                 case SET:
-                    o = stringRedisTemplate.opsForSet().pop(keyName);
+                    value = stringRedisTemplate.opsForSet().pop(keyName);
                     break;
                 case HASH:
-                    o = stringRedisTemplate.opsForHash().entries(keyName);
+                    value = stringRedisTemplate.opsForHash().entries(keyName);
                     break;
                 case LIST:
-                    o = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
+                    value = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
                     break;
                 case STRING:
-                    o = stringRedisTemplate.opsForValue().get(keyName);
+                    value = stringRedisTemplate.opsForValue().get(keyName);
                     break;
                 case NONE:
                     break;
                 case ZSET:
-                    o = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
+                    value = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
                     break;
                 default:
                     break;
             }
         }
-        return new Result(true, StatusCode.OK, "查询成功", o);
+        return Result.success("查询成功", value);
     }
 
     /**
@@ -109,9 +111,9 @@ public class KeyController {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
             List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
-            return new Result(true, StatusCode.OK, "查询成功", count);
+            return Result.success("查询成功", count);
         } else {
-            return new Result(false, StatusCode.ERROR, "未找到" + serverName);
+            return Result.errorMsg("未找到" + serverName);
         }
     }
 

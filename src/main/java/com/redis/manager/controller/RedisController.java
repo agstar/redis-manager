@@ -31,7 +31,7 @@ public class RedisController {
     public Result testConnection(@RequestBody RedisServer redisServer) {
         String pong = RedisServerUtil.ping(redisServer);
         if (StringUtils.equalsIgnoreCase(pong, "pong")) {
-            return new Result(true, StatusCode.OK, pong);
+            return Result.success(pong);
         }
         return Result.error();
 
