@@ -46,7 +46,7 @@
         </el-aside>
         <el-container style="height: 100%;">
             <el-header style="text-align: right; font-size: 12px">
-                <el-button type="primary" @click="dialogFormVisible = true">添加redis</el-button>
+                <el-button type="primary" @click="addServerVisible = true">添加redis</el-button>
                 <el-button type="primary">删除redis</el-button>
                 <el-button type="primary">修改redis</el-button>
             </el-header>
@@ -60,7 +60,7 @@
                         <el-form>
                             <el-row :gutter="10">
                                 <el-col :span="12">
-                                    <el-form-item :label="keyType.toUpperCase()+':'">
+                                    <el-form-item :label="keyType+':'">
                                         <el-col :span="18">
                                             <el-input v-model="keyName"></el-input>
                                         </el-col>
@@ -81,14 +81,19 @@
                                         <el-button>Delete</el-button>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :span="3">
+                                <el-col :span="2">
                                     <el-form-item>
-                                        <el-button>Reload Value</el-button>
+                                        <el-button icon="el-icon-refresh">Reload</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
                                         <el-button>Set TTL</el-button>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="2">
+                                    <el-form-item>
+                                        <el-button @click="addKeyVisible=true">Add Key</el-button>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -125,7 +130,7 @@
             </el-main>
         </el-container>
     </el-container>
-    <el-dialog title="添加redis" :visible.sync="dialogFormVisible">
+    <el-dialog title="添加Redis连接" :visible.sync="addServerVisible">
         <el-form :model="server">
             <el-form-item label="连接名称" :label-width="formLabelWidth">
                 <el-input v-model="server.name" autocomplete="off"></el-input>
@@ -143,7 +148,59 @@
         <div slot="footer" class="dialog-footer">
             <el-button type="success" @click="testConnection()">测试连接</el-button>
             <el-button type="primary" @click="addServer()">确 定</el-button>
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="addServerVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="Add Key" :visible.sync="addKeyVisible">
+        <el-form :model="server">
+            <el-form-item label="名称" :label-width="formLabelWidth">
+                <el-input v-model="key.keyName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="数据库" :label-width="formLabelWidth">
+                <el-select v-model="key.dbIndex" placeholder="数据库">
+                    <el-option label="0" value="0"></el-option>
+                    <el-option label="1" value="1"></el-option>
+                    <el-option label="2" value="2"></el-option>
+                    <el-option label="3" value="3"></el-option>
+                    <el-option label="4" value="4"></el-option>
+                    <el-option label="5" value="5"></el-option>
+                    <el-option label="6" value="6"></el-option>
+                    <el-option label="7" value="7"></el-option>
+                    <el-option label="8" value="8"></el-option>
+                    <el-option label="9" value="9"></el-option>
+                    <el-option label="10" value="10"></el-option>
+                    <el-option label="11" value="11"></el-option>
+                    <el-option label="12" value="12"></el-option>
+                    <el-option label="13" value="13"></el-option>
+                    <el-option label="14" value="14"></el-option>
+                    <el-option label="15" value="15"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="类型" :label-width="formLabelWidth">
+                <el-select v-model="key.keyType" placeholder="类型">
+                    <el-option label="STRING" value="string"></el-option>
+                    <el-option label="LIST" value="list"></el-option>
+                    <el-option label="SET" value="set"></el-option>
+                    <el-option label="ZSET" value="zset"></el-option>
+                    <el-option label="HASH" value="hash"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="值" :label-width="formLabelWidth">
+                <el-input v-if="key.keyType=='string'" v-model="key.keyValue" autocomplete="off"></el-input>
+                <template v-if="key.keyType=='list'">
+                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <i class="el-icon-plus"></i>
+                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <i class="el-icon-plus"></i>
+                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <i class="el-icon-plus"></i>
+                </template>
+            </el-form-item>
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="addKey()">保 存</el-button>
+            <el-button @click="addKeyVisible = false">取 消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -161,17 +218,22 @@
             viewType: 'JSON',
             viewTypeItem: ['JSON', 'TEXT'],
             keyType: 'string',
-            dialogFormVisible: false,
+            addServerVisible: false,
+            addKeyVisible: false,
             server: {
                 name: '',
                 host: '',
                 port: 6379,
                 auth: ''
             },
+            key: {
+                keyType: 'string',
+                keyName: '',
+                KeyValue: null
+            },
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: [],
-            result: {dataType: null, key: null, value: null},
             keys: [{
                 label: '一级 1',
                 index: '1-1',
@@ -188,14 +250,13 @@
                 children: 'children',
                 label: 'label'
             },
-
         },
         created() {
             console.log('created')
         },
         mounted() {
             // console.log('mounted')
-            this.getServer();
+            this.getServerList();
         },
         methods: {
             addServer() {
@@ -213,7 +274,7 @@
                     .catch((error) => {
                         console.log(error);
                     });
-                this.dialogFormVisible = false;
+                this.addServerVisible = false;
                 // this.clearServer();
             },
             clearServer() {
@@ -224,8 +285,8 @@
                     auth: ''
                 }
             },
-            testConnection() {
-                axios.post('/testConnection', this.server)
+            ping() {
+                axios.post('/ping', this.server)
                     .then((response) => {
                         this.$message({
                             message: response.data.message,
@@ -240,7 +301,7 @@
                         });
                     });
             },
-            getServer() {
+            getServerList() {
                 axios.get('/server', this.server)
                     .then((response) => {
                         // this.serverList = response.data.data;
@@ -260,28 +321,12 @@
                     .catch((error) => {
                         console.log(error);
                     });
-                this.dialogFormVisible = false;
-                // this.clearServer();
             },
-            getKeyList(servername, dbIndex) {
-                axios.get(`/key/${servername}/${dbIndex}`)
+            getKey(servername, dbIndex) {
+                axios.get(`/key/${servername}/${dbIndex}`, this.server)
                     .then((res) => {
                         if (res.data.flag) {
                             this.keys = res.data.data;
-                        }
-                        console.log(res);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            },
-            getKey(servername, dbIndex, keyName) {
-                axios.get(`/key/${servername}/${dbIndex}/${keyName}`)
-                    .then((res) => {
-                        if (res.data.flag) {
-                            this.result.dataType = res.data.data.dataType;
-                            this.result.value = res.data.data.value;
-                            console.log(this.result.value);
                         }
                         console.log(res);
                     })
@@ -305,7 +350,6 @@
                     .catch((error) => {
                         console.log(error);
                     });
-                this.dialogFormVisible = false;
             },
 
             handleOpen(index, indexPath) {
@@ -332,17 +376,52 @@
                     let serverName = indexs[0];
                     console.log('select-->' + index + '---' + indexPath);
                     console.log('select dbindex-->' + dbindex + '<--->' + serverName);
-                    this.getKeyList(serverName, dbindex);
+                    this.getKey(serverName, dbindex);
                 }
+            },
+            getValue(serverName, dbIndex, key, type) {
+                axios.get(`/key/${serverName}/${dbIndex}/${key}`)
+                    .then((res) => {
+                        if (res.data.flag) {
+                            this.value = res.data.data;
+                        }
+                        this.$message({
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
+                        });
+                        console.log(res);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
             },
             handleNodeClick(data) {
                 console.log(data);
-                var index = data.index;
-                var serverName = index.substr(0, index.lastIndexOf(":"));
-                var dbIndex = index.substr(index.lastIndexOf(":") + 1);
-                var key = data.label;
-                this.getKey(serverName, dbIndex, key);
-            }
+                let index = data.index;
+                let key = data.label;
+                let serverName = index.split(":")[0];
+                let dbIndex = index.split(":")[1];
+                this.keyType = data.type;
+                this.getValue(serverName, dbIndex, key, this.keyType);
+            },
+            addKey() {
+                axios.post('/key', this.key)
+                    .then((response) => {
+                        this.$message({
+                            message: response.data.message,
+                            type: response.data.flag ? 'success' : 'error'
+                        });
+                        //console.log(response);
+                        if (response.data.flag) {
+                            this.serverList.push(this.server)
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                this.addKeyVisible = false;
+            },
+
         }
     })
 </script>

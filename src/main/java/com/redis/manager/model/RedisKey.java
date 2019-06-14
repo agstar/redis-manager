@@ -1,10 +1,12 @@
-package com.redis.manage.model;
+package com.redis.manager.model;
 
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 import org.springframework.data.redis.connection.DataType;
-@Getter
-@Setter
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RedisKey {
     private String key;
     private DataType type;
