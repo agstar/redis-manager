@@ -198,16 +198,11 @@ public class RedisServerUtil {
         String key = redisKey.getKey();
         String[] array = key.split(":");
         JSONObject jsonObj = new JSONObject();
-        boolean hasRepeate = false;
-        for (Object o : jsonArray) {
-            JSONObject json = (JSONObject) o;
-            if (json.get("label").equals(array[0])) {
-                hasRepeate = true;
-                jsonObj = json;
-                break;
-            }
-        }
-        if (!hasRepeate) {
+        Optional<Object> label = jsonArray.stream().filter(x -> ((JSONObject) x).get("label").equals(array[0])).findFirst();
+        if (label.isPresent()) {
+            jsonObj = (JSONObject) label.get();
+        } else {
+            //没有重复的
             jsonObj.put("label", array[0]);
             jsonObj.put("index", index);
             jsonObj.put("type", redisKey.getType());

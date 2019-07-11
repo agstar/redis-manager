@@ -41,7 +41,7 @@ public class KeyController {
             while (cursor.hasNext()) {
                 String key = new String(cursor.next());
                 DataType type = stringRedisTemplate.type(key);
-                binaryKeys.add(new RedisKey(key, type));
+                binaryKeys.add(RedisKey.builder().key(key).type(type).build());
             }
             return binaryKeys;
         });
@@ -117,8 +117,9 @@ public class KeyController {
         }
     }
 
-    @PostMapping("key/{serverName}/{dbIndex}")
-    public Result addKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody RedisServer redisServer) {
+    @PostMapping("key/{serverName}")
+    public Result addKey(@PathVariable("serverName") String serverName, @RequestBody RedisKey redisKey) {
+        redisKey.getType();
         return null;
     }
 

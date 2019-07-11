@@ -59,7 +59,7 @@
                     <el-col :span="20" style="height: 100%;overflow: auto">
                         <el-form>
                             <el-row :gutter="10">
-                                <el-col :span="12">
+                                <el-col :span="10">
                                     <el-form-item :label="keyType+':'">
                                         <el-col :span="18">
                                             <el-input v-model="keyName"></el-input>
@@ -83,7 +83,7 @@
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button icon="el-icon-refresh">Reload</el-button>
+                                        <el-button>Reload</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
@@ -99,22 +99,31 @@
                             </el-row>
                         </el-form>
                         <el-row>
-                            <el-col :span="12">
-                                Value:
-                            </el-col>
-                            <el-col :span="12">
-                                View as:
-                                <template>
-                                    <el-select v-model="viewType">
-                                        <el-option
-                                                v-for="item in viewTypeItem"
-                                                :key="item"
-                                                :label="item"
-                                                :value="item">
-                                        </el-option>
-                                    </el-select>
-                                </template>
-                            </el-col>
+
+                            <el-form>
+                                <el-col :span="12">
+                                    <el-form-item>
+                                        Value:
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="12">
+                                    <el-form-item>
+                                        View as:
+                                        <template>
+                                            <el-select v-model="viewType">
+                                                <el-option
+                                                        v-for="item in viewTypeItem"
+                                                        :key="item"
+                                                        :label="item"
+                                                        :value="item">
+                                                </el-option>
+                                            </el-select>
+                                        </template>
+                                    </el-form-item>
+                                </el-col>
+                            </el-form>
+
+
                         </el-row>
                         <el-row>
                             <el-input rows="15" type="textarea" v-model="value"></el-input>
@@ -151,7 +160,7 @@
             <el-button @click="addServerVisible = false">取 消</el-button>
         </div>
     </el-dialog>
-    <el-dialog title="Add Key" :visible.sync="addKeyVisible">
+    <el-dialog title="Add New Key" :visible.sync="addKeyVisible">
         <el-form :model="server">
             <el-form-item label="名称" :label-width="formLabelWidth">
                 <el-input v-model="key.keyName" autocomplete="off"></el-input>
@@ -185,17 +194,39 @@
                     <el-option label="HASH" value="hash"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="值" :label-width="formLabelWidth">
-                <el-input v-if="key.keyType=='string'" v-model="key.keyValue" autocomplete="off"></el-input>
+            <el-form-item v-if="key.keyType=='string'||key.keyType=='set'||key.keyType=='list'" label="值"
+                          :label-width="formLabelWidth">
+                <el-input type="textarea" v-model="key.keyValue"
+                          autocomplete="off"></el-input>
                 <template v-if="key.keyType=='list'">
-                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <el-input type="textarea" style="width:90%;" autocomplete="off"></el-input>
                     <i class="el-icon-plus"></i>
-                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <el-input type="textarea" style="width:90%;" autocomplete="off"></el-input>
                     <i class="el-icon-plus"></i>
-                    <el-input style="width:90%;" autocomplete="off"></el-input>
+                    <el-input type="textarea" style="width:90%;" autocomplete="off"></el-input>
                     <i class="el-icon-plus"></i>
                 </template>
+
             </el-form-item>
+            <template v-if="key.keyType=='zset'">
+                <el-form-item label="Score" :label-width="formLabelWidth">
+                    <el-input v-model="key.score" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="值" :label-width="formLabelWidth">
+                    <el-input type="textarea" v-model="key.keyValue" autocomplete="off"></el-input>
+                </el-form-item>
+            </template>
+
+            <template v-if="key.keyType=='hash'">
+                <el-form-item label="Key" v-model="key.key" :label-width="formLabelWidth">
+                    <el-input type="textarea" v-model="key.key" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="Value" :label-width="formLabelWidth">
+                    <el-input type="textarea" v-model="key.val" autocomplete="off"></el-input>
+                </el-form-item>
+
+            </template>
+
 
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -215,6 +246,7 @@
             keyName: 'redisKey',
             value: '这是value',
             dbIndex: 0,
+            serverName: '',
             viewType: 'JSON',
             viewTypeItem: ['JSON', 'TEXT'],
             keyType: 'string',
@@ -230,7 +262,8 @@
                 keyType: 'string',
                 keyName: '',
                 dbIndex: this.dbIndex,
-                KeyValue: null
+                score: null,
+                keyValue: null
             },
             formLabelWidth: '120px',
             serverKeys: [],
@@ -352,7 +385,6 @@
                         console.log(error);
                     });
             },
-
             handleOpen(index, indexPath) {
                 console.log('open--->' + index + '<--->' + indexPath);
                 if (index.indexOf('-') > -1) {
@@ -376,6 +408,7 @@
                     this.dbIndex = dbindex;
                     this.key.dbIndex = dbindex;
                     let serverName = indexs[0];
+                    this.serverName = serverName;
                     console.log('select-->' + index + '---' + indexPath);
                     console.log('select dbindex-->' + dbindex + '<--->' + serverName);
                     this.getKey(serverName, dbindex);
@@ -411,7 +444,7 @@
                 this.getValue(serverName, dbIndex, key, this.keyType);
             },
             addKey() {
-                axios.post('/key', this.key)
+                axios.post(`/key/${this.serverName}`, this.key)
                     .then((response) => {
                         this.$message({
                             message: response.data.message,
@@ -427,7 +460,6 @@
                     });
                 this.addKeyVisible = false;
             },
-
         }
     })
 </script>

@@ -25,9 +25,7 @@ public class ConvertUtil {
 
         List<RedisKey> redisKeyList = new ArrayList<>();
         keys.forEach(x -> {
-            RedisKey redisKey = new RedisKey();
-            redisKey.setKey(x);
-            redisKey.setType(stringRedisTemplate.type(x));
+            RedisKey redisKey = RedisKey.builder().key(x).type(stringRedisTemplate.type(x)).build();
             redisKeyList.add(redisKey);
         });
         return redisKeyList;
