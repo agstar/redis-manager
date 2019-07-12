@@ -106,7 +106,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 将当前数据库的 key 移动到给定的数据库 db 当中
+	 * 将当前数据库的 keyName 移动到给定的数据库 db 当中
 	 * 
 	 * @param key
 	 * @param dbIndex
@@ -117,7 +117,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 移除 key 的过期时间，key 将持久保持
+	 * 移除 keyName 的过期时间，keyName 将持久保持
 	 * 
 	 * @param key
 	 * @return
@@ -127,7 +127,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 返回 key 的剩余的过期时间
+	 * 返回 keyName 的剩余的过期时间
 	 * 
 	 * @param key
 	 * @param unit
@@ -138,7 +138,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 返回 key 的剩余的过期时间
+	 * 返回 keyName 的剩余的过期时间
 	 * 
 	 * @param key
 	 * @return
@@ -148,7 +148,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 从当前数据库中随机返回一个 key
+	 * 从当前数据库中随机返回一个 keyName
 	 * 
 	 * @return
 	 */
@@ -157,7 +157,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 修改 key 的名称
+	 * 修改 keyName 的名称
 	 * 
 	 * @param oldKey
 	 * @param newKey
@@ -178,7 +178,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 返回 key 所储存的值的类型
+	 * 返回 keyName 所储存的值的类型
 	 * 
 	 * @param key
 	 * @return
@@ -190,7 +190,7 @@ public class RedisUtil {
 	/** -------------------string相关操作--------------------- */
 
 	/**
-	 * 设置指定 key 的值
+	 * 设置指定 keyName 的值
 	 * @param key
 	 * @param value
 	 */
@@ -199,7 +199,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 获取指定 key 的值
+	 * 获取指定 keyName 的值
 	 * @param key
 	 * @return
 	 */
@@ -208,7 +208,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 返回 key 中字符串值的子字符
+	 * 返回 keyName 中字符串值的子字符
 	 * @param key
 	 * @param start
 	 * @param end
@@ -219,7 +219,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 将给定 key 的值设为 value ，并返回 key 的旧值(old value)
+	 * 将给定 keyName 的值设为 value ，并返回 keyName 的旧值(old value)
 	 * 
 	 * @param key
 	 * @param value
@@ -230,7 +230,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 对 key 所储存的字符串值，获取指定偏移量上的位(bit)
+	 * 对 keyName 所储存的字符串值，获取指定偏移量上的位(bit)
 	 * 
 	 * @param key
 	 * @param offset
@@ -265,7 +265,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 将值 value 关联到 key ，并将 key 的过期时间设为 timeout
+	 * 将值 value 关联到 keyName ，并将 keyName 的过期时间设为 timeout
 	 * 
 	 * @param key
 	 * @param value
@@ -280,7 +280,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 只有在 key 不存在时设置 key 的值
+	 * 只有在 keyName 不存在时设置 keyName 的值
 	 * 
 	 * @param key
 	 * @param value
@@ -291,7 +291,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 用 value 参数覆写给定 key 所储存的字符串值，从偏移量 offset 开始
+	 * 用 value 参数覆写给定 keyName 所储存的字符串值，从偏移量 offset 开始
 	 * 
 	 * @param key
 	 * @param value
@@ -322,7 +322,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在
+	 * 同时设置一个或多个 keyName-value 对，当且仅当所有给定 keyName 都不存在
 	 * 
 	 * @param maps
 	 * @return 之前已经存在返回false,不存在返回true
@@ -429,7 +429,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 查看哈希表 key 中，指定的字段是否存在
+	 * 查看哈希表 keyName 中，指定的字段是否存在
 	 * 
 	 * @param key
 	 * @param field
@@ -440,7 +440,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 为哈希表 key 中的指定字段的整数值加上增量 increment
+	 * 为哈希表 keyName 中的指定字段的整数值加上增量 increment
 	 * 
 	 * @param key
 	 * @param field
@@ -452,7 +452,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 为哈希表 key 中的指定字段的整数值加上增量 increment
+	 * 为哈希表 keyName 中的指定字段的整数值加上增量 increment
 	 * 
 	 * @param key
 	 * @param field

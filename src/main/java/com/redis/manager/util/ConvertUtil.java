@@ -1,3 +1,4 @@
+/*
 package com.redis.manager.util;
 
 import com.redis.manager.model.RedisKey;
@@ -24,8 +25,11 @@ public class ConvertUtil {
         Set<String> keys = stringRedisTemplate.keys("*");
 
         List<RedisKey> redisKeyList = new ArrayList<>();
+        if(){
+
+        }
         keys.forEach(x -> {
-            RedisKey redisKey = RedisKey.builder().key(x).type(stringRedisTemplate.type(x)).build();
+            RedisKey redisKey = RedisKey.builder().keyName(x).type(stringRedisTemplate.type(x).code()).build();
             redisKeyList.add(redisKey);
         });
         return redisKeyList;
@@ -45,3 +49,4 @@ public class ConvertUtil {
 
 
 }
+*/

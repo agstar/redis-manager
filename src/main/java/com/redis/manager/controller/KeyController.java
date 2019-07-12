@@ -2,10 +2,10 @@ package com.redis.manager.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.redis.manager.entity.Result;
-import com.redis.manager.entity.StatusCode;
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
 import com.redis.manager.util.RedisServerUtil;
+import com.redis.manager.util.RedisUtil;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
@@ -40,8 +40,8 @@ public class KeyController {
             Cursor<byte[]> cursor = redisConnection.scan(SCAN_OPTIONS);
             while (cursor.hasNext()) {
                 String key = new String(cursor.next());
-                DataType type = stringRedisTemplate.type(key);
-                binaryKeys.add(RedisKey.builder().key(key).type(type).build());
+                String type = Optional.ofNullable(stringRedisTemplate.type(key)).map(DataType::code).orElse(null);
+                binaryKeys.add(RedisKey.builder().keyName(key).type(type).build());
             }
             return binaryKeys;
         });
@@ -117,10 +117,43 @@ public class KeyController {
         }
     }
 
-    @PostMapping("key/{serverName}")
-    public Result addKey(@PathVariable("serverName") String serverName, @RequestBody RedisKey redisKey) {
-        redisKey.getType();
-        return null;
+
+    @PostMapping("key/{serverName}/{dbIndex}")
+    public Result addKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody RedisKey redisKey) {
+        StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
+        DataType type = DataType.fromCode(redisKey.getType());
+        RedisUtil redisUtil = new RedisUtil();
+        redisUtil.setRedisTemplate(stringRedisTemplate);
+        switch (type) {
+            case SET:
+                redisUtil.sAdd(redisKey.getKeyName(), redisKey.getKeyValue());
+                break;
+            case HASH:
+                redisUtil.hPut(redisKey.getKeyName(), redisKey.getHashKey(), redisKey.getKeyValue());
+                break;
+            case LIST:
+                redisUtil.lRightPush(redisKey.getKeyName(), redisKey.getKeyValue());
+                break;
+            case STRING:
+                redisUtil.set(redisKey.getKeyName(), redisKey.getKeyValue());
+                break;
+            case ZSET:
+                redisUtil.zAdd(redisKey.getKeyName(), redisKey.getKeyValue(), redisKey.getScore());
+                break;
+            default:
+                return Result.errorMsg("没有找到对应的类型");
+        }
+        return Result.success("添加成功");
+    }
+
+    @PostMapping("key/delete/{serverName}/{dbIndex}")
+    public Result deleteKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody List<String> keyList) {
+        StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
+        if (stringRedisTemplate == null) {
+            return Result.errorMsg("获取StringRedisTemplate失败");
+        }
+        keyList.forEach(stringRedisTemplate::delete);
+        return Result.success("删除成功");
     }
 
 

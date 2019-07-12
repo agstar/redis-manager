@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -192,10 +191,10 @@ public class RedisServerUtil {
     /**
      * 递归获取树形菜单
      */
-    public static JSONArray getKeyTree(RedisKey redisKey, JSONArray jsonArray, String serverName, int dbIndex) {
+    public static void getKeyTree(RedisKey redisKey, JSONArray jsonArray, String serverName, int dbIndex) {
         String index = serverName + ":" + dbIndex;
-        JSONArray temp = jsonArray;
-        String key = redisKey.getKey();
+        //JSONArray temp = jsonArray;
+        String key = redisKey.getKeyName();
         String[] array = key.split(":");
         JSONObject jsonObj = new JSONObject();
         Optional<Object> label = jsonArray.stream().filter(x -> ((JSONObject) x).get("label").equals(array[0])).findFirst();
@@ -242,11 +241,10 @@ public class RedisServerUtil {
                     jsonObj.put("index", index);
                     jsonObj.put("type", redisKey.getType());
                     childrens.add(jsonObj);
-                    jsonArray = temp;
+                    //jsonArray = temp;
                 }
             }
         }
-        return jsonArray;
     }
 
     public static JSONObject getKeyTree(String key) {

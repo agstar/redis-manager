@@ -27,6 +27,12 @@
         html, body, #app {
             height: 100%;
         }
+
+        .el-tree > .el-tree-node {
+            display: inline-block;
+            min-width: 100%;
+            width: auto;
+        }
     </style>
 </head>
 <body>
@@ -45,6 +51,7 @@
             </el-menu>
         </el-aside>
         <el-container style="height: 100%;">
+            <div style="color: rebeccapurple"></div>
             <el-header style="text-align: right; font-size: 12px">
                 <el-button type="primary" @click="addServerVisible = true">添加redis</el-button>
                 <el-button type="primary">删除redis</el-button>
@@ -53,8 +60,15 @@
             <el-main style="height: 100%;">
                 <el-row :gutter="20" style="height: 100%;">
                     <el-col :span="4" style="height: 100%;overflow: auto">
-                        <el-tree :data="keys" :props="defaultProps" check-on-click-node
-                                 @node-click="handleNodeClick"></el-tree>
+                        <el-tree :data="keys"
+                                 :props="defaultProps"
+                                 highlight-current
+                                 show-checkbox
+                                 @node-click="handleNodeClick"
+                                 @check="handleCheck"
+                                 @check-change="handleCheckChange">
+                            >
+                        </el-tree>
                     </el-col>
                     <el-col :span="20" style="height: 100%;overflow: auto">
                         <el-form>
@@ -78,7 +92,7 @@
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button>Delete</el-button>
+                                        <el-button @click="deleteKey">Delete</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
@@ -99,7 +113,6 @@
                             </el-row>
                         </el-form>
                         <el-row>
-
                             <el-form>
                                 <el-col :span="12">
                                     <el-form-item>
@@ -122,8 +135,6 @@
                                     </el-form-item>
                                 </el-col>
                             </el-form>
-
-
                         </el-row>
                         <el-row>
                             <el-input rows="15" type="textarea" v-model="value"></el-input>
@@ -166,7 +177,7 @@
                 <el-input v-model="key.keyName" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="数据库" :label-width="formLabelWidth">
-                <el-select v-model="key.dbIndex" placeholder="数据库">
+                <el-select v-model="dbIndex" placeholder="数据库">
                     <el-option label="0" value="0"></el-option>
                     <el-option label="1" value="1"></el-option>
                     <el-option label="2" value="2"></el-option>
@@ -186,7 +197,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="类型" :label-width="formLabelWidth">
-                <el-select v-model="key.keyType" placeholder="类型">
+                <el-select v-model="key.type" placeholder="类型">
                     <el-option label="STRING" value="string"></el-option>
                     <el-option label="LIST" value="list"></el-option>
                     <el-option label="SET" value="set"></el-option>
@@ -194,11 +205,11 @@
                     <el-option label="HASH" value="hash"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item v-if="key.keyType=='string'||key.keyType=='set'||key.keyType=='list'" label="值"
+            <el-form-item v-if="key.type=='string'||key.type=='set'||key.type=='list'" label="值"
                           :label-width="formLabelWidth">
                 <el-input type="textarea" v-model="key.keyValue"
                           autocomplete="off"></el-input>
-                <template v-if="key.keyType=='list'">
+                <template v-if="key.type=='list'">
                     <el-input type="textarea" style="width:90%;" autocomplete="off"></el-input>
                     <i class="el-icon-plus"></i>
                     <el-input type="textarea" style="width:90%;" autocomplete="off"></el-input>
@@ -208,7 +219,7 @@
                 </template>
 
             </el-form-item>
-            <template v-if="key.keyType=='zset'">
+            <template v-if="key.type=='zset'">
                 <el-form-item label="Score" :label-width="formLabelWidth">
                     <el-input v-model="key.score" autocomplete="off"></el-input>
                 </el-form-item>
@@ -217,12 +228,12 @@
                 </el-form-item>
             </template>
 
-            <template v-if="key.keyType=='hash'">
-                <el-form-item label="Key" v-model="key.key" :label-width="formLabelWidth">
-                    <el-input type="textarea" v-model="key.key" autocomplete="off"></el-input>
+            <template v-if="key.type=='hash'">
+                <el-form-item label="Key" v-model="key.hashKey" :label-width="formLabelWidth">
+                    <el-input type="textarea" v-model="key.hashKey" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="Value" :label-width="formLabelWidth">
-                    <el-input type="textarea" v-model="key.val" autocomplete="off"></el-input>
+                    <el-input type="textarea" v-model="key.keyValue" autocomplete="off"></el-input>
                 </el-form-item>
 
             </template>
@@ -252,6 +263,7 @@
             keyType: 'string',
             addServerVisible: false,
             addKeyVisible: false,
+            checkedKeys: [],
             server: {
                 name: '',
                 host: '',
@@ -259,9 +271,9 @@
                 auth: ''
             },
             key: {
-                keyType: 'string',
+                type: 'string',
                 keyName: '',
-                dbIndex: this.dbIndex,
+                hashKey: '',
                 score: null,
                 keyValue: null
             },
@@ -318,6 +330,14 @@
                     port: 6379,
                     auth: ''
                 }
+            },
+            clearKey() {
+                this.key.type = 'string';
+                this.key.keyName = '';
+                this.key.hashKey = '';
+                this.key.score = null;
+                this.key.keyValue = null;
+
             },
             ping() {
                 axios.post('/ping', this.server)
@@ -389,7 +409,7 @@
                 console.log('open--->' + index + '<--->' + indexPath);
                 if (index.indexOf('-') > -1) {
                     //open---10.216.115.188-1---1,10.216.115.188-1
-                    //this.getKey()
+                    //this.getKeyName()
                 } else {
                     let server = this.serverList[parseInt(index)];
                     console.log(JSON.stringify(server));
@@ -433,33 +453,75 @@
                         console.log(error);
                     });
             },
+            handleCheckChange(data, checked, indeterminate) {
+                // console.log('----------handleCheckChange-----begin-------------');
+                // console.log(data, checked, indeterminate);
+                // console.log('----------handleCheckChange-----end-------------');
+            },
+            handleCheck(data, status) {
+                // console.log('----------handleCheck-----begin-------------');
+                let treeNodeId = data.$treeNodeId;
+                //all checked node
+                let checkedNodes = status.checkedNodes.filter(node => node.children === undefined);
+                this.checkedKeys = checkedNodes.map(item => item.label);
+                // console.log(this.checkedKeys);
+            },
             handleNodeClick(data) {
-                console.log(data);
-                let index = data.index;
-                let key = data.label;
-                let serverName = index.split(":")[0];
-                let dbIndex = index.split(":")[1];
-                this.keyType = data.type;
-                this.keyName = key;
-                this.getValue(serverName, dbIndex, key, this.keyType);
+                // console.log('----------handleNodeClick-----begin-------------');
+                // console.log(data);
+                // console.log('----------handleNodeClick-----end-------------');
+                var children = data.children;
+                if (children == null) {
+                    let index = data.index;
+                    let key = data.label;
+                    let serverName = index.split(":")[0];
+                    let dbIndex = index.split(":")[1];
+                    this.keyType = data.type;
+                    this.keyName = key;
+                    this.getValue(serverName, dbIndex, key, this.keyType);
+                }
             },
             addKey() {
-                axios.post(`/key/${this.serverName}`, this.key)
-                    .then((response) => {
+                axios.post(`/key/${this.serverName}/${this.dbIndex}`, this.key)
+                    .then((res) => {
                         this.$message({
-                            message: response.data.message,
-                            type: response.data.flag ? 'success' : 'error'
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
                         });
-                        //console.log(response);
-                        if (response.data.flag) {
-                            this.serverList.push(this.server)
+                        if (res.data.flag) {
+                            this.getKey(this.serverName, this.dbIndex)
+                        }
+                        this.addKeyVisible = false;
+                        this.clearKey();
+                    })
+                    .catch((error) => {
+                        this.$message({
+                            message: error,
+                            type: 'error'
+                        });
+                        this.addKeyVisible = false;
+                        this.clearKey();
+                    });
+                // console.log('--执行玩了吗---')
+            },
+            deleteKey() {
+                axios.post(`/key/delete/${this.serverName}/${this.dbIndex}`, this.checkedKeys)
+                    .then((res) => {
+                        this.$message({
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
+                        });
+                        if (res.data.flag) {
+                            this.getKey(this.serverName, this.dbIndex)
                         }
                     })
                     .catch((error) => {
-                        console.log(error);
+                        this.$message({
+                            message: error,
+                            type: 'error'
+                        });
                     });
-                this.addKeyVisible = false;
-            },
+            }
         }
     })
 </script>

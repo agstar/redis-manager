@@ -69,7 +69,7 @@ public class RedisConfig {
         // 定义RedisTemplate，并设置连接工程
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
 
-        // key 的序列化采用 StringRedisSerializer
+        // keyName 的序列化采用 StringRedisSerializer
         redisTemplate.setKeySerializer(stringRedisSerializer);
         redisTemplate.setHashKeySerializer(stringRedisSerializer);
         // value 值的序列化采用 GenericJackson2JsonRedisSerializer

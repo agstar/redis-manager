@@ -7,12 +7,12 @@ import org.springframework.data.redis.connection.DataType;
 @Data
 @Builder
 public class RedisKey {
-    private String key;
-
-    private DataType type;
     private String keyName;
+    private String type;
+    private String hashKey;
     private int dbIndex;
     private String keyValue;
+    private Double score;
 
 
 
