@@ -11,9 +11,9 @@ public class RedisKey {
     private String type;
     private String hashKey;
     private int dbIndex;
-    private String keyValue;
+    private Object keyValue;
     private Double score;
-
+    private long ttl;
 
 
 }

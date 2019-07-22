@@ -33,10 +33,14 @@
             min-width: 100%;
             width: auto;
         }
+
+        [v-cloak] {
+            display: none;
+        }
     </style>
 </head>
 <body>
-<div id="app">
+<div id="app" v-cloak>
     <el-container style="height: 100%; border: 1px solid #eee">
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
             <el-menu @open="handleOpen" @select="handleSelect">
@@ -53,9 +57,9 @@
         <el-container style="height: 100%;">
             <div style="color: rebeccapurple"></div>
             <el-header style="text-align: right; font-size: 12px">
-                <el-button type="primary" @click="addServerVisible = true">添加redis</el-button>
-                <el-button type="primary">删除redis</el-button>
-                <el-button type="primary">修改redis</el-button>
+                <el-button type="primary" @click="addServerVisible = true">添加连接</el-button>
+                <el-button type="primary">删除连接</el-button>
+                <el-button type="primary">修改连接</el-button>
             </el-header>
             <el-main style="height: 100%;">
                 <el-row :gutter="20" style="height: 100%;">
@@ -65,44 +69,43 @@
                                  highlight-current
                                  show-checkbox
                                  @node-click="handleNodeClick"
-                                 @check="handleCheck"
-                                 @check-change="handleCheckChange">
+                                 @check="handleCheck">
                             >
                         </el-tree>
                     </el-col>
                     <el-col :span="20" style="height: 100%;overflow: auto">
-                        <el-form>
-                            <el-row :gutter="10">
+                        <el-row :gutter="10">
+                            <el-form>
                                 <el-col :span="10">
                                     <el-form-item :label="keyType+':'">
                                         <el-col :span="18">
-                                            <el-input v-model="keyName"></el-input>
+                                            <el-input v-model="keyName" readonly></el-input>
                                         </el-col>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item label="TTL:">
-                                        <span>-1</span>
+                                        <span>{{ttl}}</span>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button>Rename</el-button>
+                                        <el-button @click="openRenameDialog()">Rename</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button @click="deleteKey">Delete</el-button>
+                                        <el-button @click="deleteKey()">Delete</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button>Reload</el-button>
+                                        <el-button @click="reload()">Reload</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
                                     <el-form-item>
-                                        <el-button>Set TTL</el-button>
+                                        <el-button @click="ttlVisible=true">Set TTL</el-button>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="2">
@@ -110,8 +113,43 @@
                                         <el-button @click="addKeyVisible=true">Add Key</el-button>
                                     </el-form-item>
                                 </el-col>
-                            </el-row>
-                        </el-form>
+                            </el-form>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="16">
+                                <el-table
+                                        :data="tableData"
+                                        stripe
+                                        border
+                                        max-height="430"
+                                        style="width: 100%">
+                                    <el-table-column
+                                            prop="row"
+                                            label="行"
+                                            width="100">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="value"
+                                            label="值">
+                                    </el-table-column>
+                                    <!--<el-table-column
+                                            prop="address"
+                                            label="地址">
+                                    </el-table-column>-->
+                                </el-table>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-pagination
+                                        @size-change="handleSizeChange"
+                                        @current-change="handleCurrentChange"
+                                        :current-page="3"
+                                        :page-sizes="[100, 200, 300, 400]"
+                                        :page-size="100"
+                                        layout="total, sizes, prev, pager, next, jumper"
+                                        :total="400">
+                                </el-pagination>
+                            </el-col>
+                        </el-row>
                         <el-row>
                             <el-form>
                                 <el-col :span="12">
@@ -120,10 +158,9 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="12">
-                                    <el-form-item>
-                                        View as:
+                                    <el-form-item label="View as:">
                                         <template>
-                                            <el-select v-model="viewType">
+                                            <el-select v-model="viewType" @change="changeViewType">
                                                 <el-option
                                                         v-for="item in viewTypeItem"
                                                         :key="item"
@@ -137,7 +174,7 @@
                             </el-form>
                         </el-row>
                         <el-row>
-                            <el-input rows="15" type="textarea" v-model="value"></el-input>
+                            <el-input rows="10" type="textarea" v-model="value"></el-input>
                         </el-row>
                         <el-row style="margin-top: 20px;">
                             <el-button type="primary" style="position: relative;right:0;">Save</el-button>
@@ -150,6 +187,7 @@
             </el-main>
         </el-container>
     </el-container>
+    <!--add redis server connection dialog-->
     <el-dialog title="添加Redis连接" :visible.sync="addServerVisible">
         <el-form :model="server">
             <el-form-item label="连接名称" :label-width="formLabelWidth">
@@ -171,6 +209,31 @@
             <el-button @click="addServerVisible = false">取 消</el-button>
         </div>
     </el-dialog>
+    <!--rename key name dialog-->
+    <el-dialog title="重命名" :visible.sync="renameKeyVisible">
+        <el-form>
+            <el-form-item label="新名称" :label-width="formLabelWidth">
+                <el-input v-model="newKeyName" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="rename()">确 定</el-button>
+            <el-button @click="renameKeyVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <!--set ttl dialog-->
+    <el-dialog title="TTL" :visible.sync="ttlVisible">
+        <el-form>
+            <el-form-item label="ttl" :label-width="formLabelWidth">
+                <el-input v-model="ttl" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="updateTtl()">确 定</el-button>
+            <el-button @click="ttlVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <!--add new key dialog-->
     <el-dialog title="Add New Key" :visible.sync="addKeyVisible">
         <el-form :model="server">
             <el-form-item label="名称" :label-width="formLabelWidth">
@@ -235,10 +298,7 @@
                 <el-form-item label="Value" :label-width="formLabelWidth">
                     <el-input type="textarea" v-model="key.keyValue" autocomplete="off"></el-input>
                 </el-form-item>
-
             </template>
-
-
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="addKey()">保 存</el-button>
@@ -254,16 +314,22 @@
             head: 'headersss',
             main: 'main',
             aside: 'Aside',
-            keyName: 'redisKey',
-            value: '这是value',
+            keyName: '',
+            newKeyName: '',
+            value: '',
+            jsonValue: '',
+            textValue: '',
+            ttl: -1,
             dbIndex: 0,
             serverName: '',
-            viewType: 'JSON',
-            viewTypeItem: ['JSON', 'TEXT'],
-            keyType: 'string',
+            viewType: 'TEXT',
+            viewTypeItem: ['TEXT', 'JSON'],
+            keyType: 'keyType',
             addServerVisible: false,
             addKeyVisible: false,
             checkedKeys: [],
+            renameKeyVisible: false,
+            ttlVisible: false,
             server: {
                 name: '',
                 host: '',
@@ -280,22 +346,56 @@
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: [],
-            keys: [{
-                label: '一级 1',
-                index: '1-1',
-                children: [{
-                    label: '二级 1-1',
-                    index: '1-2',
-                    children: [{
-                        label: '三级 1-1-1',
-                        index: '1-3',
-                    }]
-                }]
-            }],
+            keys: [],
             defaultProps: {
                 children: 'children',
                 label: 'label'
             },
+            tableData: [{
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1518 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1517 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }, {
+                row: '1',
+                value: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }]
         },
         created() {
             console.log('created')
@@ -307,13 +407,13 @@
         methods: {
             addServer() {
                 axios.post('/server', this.server)
-                    .then((response) => {
+                    .then((res) => {
                         this.$message({
-                            message: response.data.message,
-                            type: response.data.flag ? 'success' : 'error'
+                            message: res.data.message,
+                            type: res.data.flag ? 'success' : 'error'
                         });
                         //console.log(response);
-                        if (response.data.flag) {
+                        if (res.data.flag) {
                             this.serverList.push(this.server)
                         }
                     })
@@ -355,26 +455,95 @@
                         });
                     });
             },
+            changeViewType() {
+                if (this.viewType === 'JSON') {
+                    this.value = this.jsonValue;
+                } else {
+                    this.value = this.textValue;
+                }
+            },
+            openRenameDialog() {
+                this.newKeyName = this.keyName;
+                this.renameKeyVisible = true;
+            },
+            rename() {
+                axios.put(`/key/${this.serverName}/${this.dbIndex}/${this.keyName}/${this.newKeyName}`)
+                    .then((res) => {
+                        this.renameKeyVisible = false;
+                        if (res.data.flag) {
+                            this.keyName = this.newKeyName;
+                            this.getKey(this.serverName, this.dbIndex);
+                        }
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
+
+                        // console.log(res);
+                    })
+                    .catch((error) => {
+                        this.ttlVisible = false;
+                        this.$message({
+                            message: error.message,
+                            type: 'error'
+                        });
+                        console.log(error);
+                    });
+            },
+
+            updateTtl() {
+                axios.put(`/key/ttl/${this.serverName}/${this.dbIndex}/${this.keyName}/${this.ttl}`)
+                    .then((res) => {
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
+                        this.ttlVisible = false;
+                        // console.log(res);
+                    })
+                    .catch((error) => {
+                        this.ttlVisible = false;
+                        this.$message({
+                            message: error.message,
+                            type: 'error'
+                        });
+                        console.log(error);
+
+                    });
+            },
             getServerList() {
                 axios.get('/server', this.server)
-                    .then((response) => {
+                    .then((res) => {
                         // this.serverList = response.data.data;
-                        this.serverList = response.data.data;
-                        console.log('----------getServer-------------');
-                        console.log(response.data.data);
+                        this.serverList = res.data.data;
+                        // console.log('----------getServer-------------');
+                        // console.log(res.data.data);
                         this.serverList.forEach((item) => {
                             this.$set(item, 'dbList', []);
                             this.$set(item, 'firstOpen', true);
                         });
-                        this.$message({
-                            message: response.data.message,
-                            type: response.data.flag ? 'success' : 'error'
-                        });
-                        console.log(response);
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
+                        // console.log(res);
                     })
                     .catch((error) => {
+                        this.$message({
+                            message: error,
+                            type: 'error'
+                        });
                         console.log(error);
                     });
+            },
+            reload() {
+                this.getKey(this.serverName, this.dbIndex);
             },
             getKey(servername, dbIndex) {
                 axios.get(`/key/${servername}/${dbIndex}`, this.server)
@@ -382,9 +551,13 @@
                         if (res.data.flag) {
                             this.keys = res.data.data;
                         }
-                        console.log(res);
+                        // console.log(res);
                     })
                     .catch((error) => {
+                        this.$message({
+                            message: error,
+                            type: 'error'
+                        });
                         console.log(error);
                     });
             },
@@ -395,13 +568,19 @@
                             server['dbList'] = res.data.data;
                             server['firstOpen'] = false;
                         }
-                        this.$message({
-                            message: res.data.message,
-                            type: res.data.flag ? 'success' : 'error'
-                        });
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
                         console.log(res);
                     })
                     .catch((error) => {
+                        this.$message({
+                            message: error,
+                            type: 'error'
+                        });
                         console.log(error);
                     });
             },
@@ -412,7 +591,6 @@
                     //this.getKeyName()
                 } else {
                     let server = this.serverList[parseInt(index)];
-                    console.log(JSON.stringify(server));
                     let firstOpen = server['firstOpen'];
                     if (firstOpen) {
                         this.getKeyCount(server)
@@ -421,7 +599,7 @@
             },
             handleSelect(index, indexPath) {
                 let indexs = index.split('-');
-                console.log('index--' + indexs.length + '<---->' + indexs);
+                // console.log('index--' + indexs.length + '<---->' + indexs);
                 if (indexs.length === 3) {
                     let keyCount = indexs[2];
                     let dbindex = indexs[1];
@@ -429,8 +607,8 @@
                     this.key.dbIndex = dbindex;
                     let serverName = indexs[0];
                     this.serverName = serverName;
-                    console.log('select-->' + index + '---' + indexPath);
-                    console.log('select dbindex-->' + dbindex + '<--->' + serverName);
+                    // console.log('select-->' + index + '---' + indexPath);
+                    // console.log('select dbindex-->' + dbindex + '<--->' + serverName);
                     this.getKey(serverName, dbindex);
                 }
             },
@@ -438,29 +616,35 @@
                 axios.get(`/key/${serverName}/${dbIndex}/${key}`)
                     .then((res) => {
                         if (res.data.flag) {
-                            let value = res.data.data;
-                            if (type === 'STRING') {
-                                this.value = JSON.stringify(JSON.parse(value), null, 2)
+                            let value = res.data.data.keyValue;
+                            this.ttl = res.data.data.ttl;
+                            this.textValue = value;
+                            this.value = this.textValue;
+                            try {
+                                this.jsonValue = JSON.stringify(JSON.parse(value), null, 2)
+                            } catch (e) {
+                                this.jsonValue = value;
                             }
                         }
-                        this.$message({
-                            message: res.data.message,
-                            type: res.data.flag ? 'success' : 'error'
-                        });
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
                         console.log(res);
                     })
                     .catch((error) => {
+                        this.$message({
+                            message: error.message,
+                            type: 'error'
+                        });
                         console.log(error);
                     });
             },
-            handleCheckChange(data, checked, indeterminate) {
-                // console.log('----------handleCheckChange-----begin-------------');
-                // console.log(data, checked, indeterminate);
-                // console.log('----------handleCheckChange-----end-------------');
-            },
             handleCheck(data, status) {
                 // console.log('----------handleCheck-----begin-------------');
-                let treeNodeId = data.$treeNodeId;
+                // let treeNodeId = data.$treeNodeId;
                 //all checked node
                 let checkedNodes = status.checkedNodes.filter(node => node.children === undefined);
                 this.checkedKeys = checkedNodes.map(item => item.label);
@@ -476,18 +660,21 @@
                     let key = data.label;
                     let serverName = index.split(":")[0];
                     let dbIndex = index.split(":")[1];
-                    this.keyType = data.type;
+                    this.keyType = data.type.toUpperCase();
                     this.keyName = key;
+                    this.viewType = 'TEXT';
                     this.getValue(serverName, dbIndex, key, this.keyType);
                 }
             },
             addKey() {
                 axios.post(`/key/${this.serverName}/${this.dbIndex}`, this.key)
                     .then((res) => {
-                        this.$message({
-                            message: res.data.message,
-                            type: res.data.flag ? 'success' : 'error'
-                        });
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
                         if (res.data.flag) {
                             this.getKey(this.serverName, this.dbIndex)
                         }
@@ -507,10 +694,12 @@
             deleteKey() {
                 axios.post(`/key/delete/${this.serverName}/${this.dbIndex}`, this.checkedKeys)
                     .then((res) => {
-                        this.$message({
-                            message: res.data.message,
-                            type: res.data.flag ? 'success' : 'error'
-                        });
+                        if (!res.data.flag) {
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            });
+                        }
                         if (res.data.flag) {
                             this.getKey(this.serverName, this.dbIndex)
                         }
@@ -521,7 +710,17 @@
                             type: 'error'
                         });
                     });
+            },
+            saveKey() {
+
+            },
+            handleSizeChange(){
+
+            },
+            handleCurrentChange(){
+
             }
+
         }
     })
 </script>

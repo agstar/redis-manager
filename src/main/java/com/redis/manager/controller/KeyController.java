@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.redis.manager.util.Const.*;
 
@@ -49,7 +50,7 @@ public class KeyController {
         if (keys != null) {
             keys.forEach(x -> RedisServerUtil.getKeyTree(x, jsonArray, serverName, dbIndex));
         }
-        return Result.success("查询成功", jsonArray);
+        return Result.success(jsonArray);
     }
 
     private StringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {
@@ -70,9 +71,10 @@ public class KeyController {
      * @date 2019/6/13 21:14
      */
     @GetMapping("key/{serverName}/{dbIndex}/{keyName}")
-    public Result getKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName) {
+    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         DataType type = stringRedisTemplate.type(keyName);
+        Long expire = stringRedisTemplate.getExpire(keyName);
         Object value = null;
         if (type != null) {
             switch (type) {
@@ -97,7 +99,8 @@ public class KeyController {
                     break;
             }
         }
-        return Result.success("查询成功", value);
+        RedisKey redisKey = RedisKey.builder().keyValue(value).ttl(Optional.ofNullable(expire).orElse(-1L)).build();
+        return Result.success(redisKey);
     }
 
     /**
@@ -111,7 +114,7 @@ public class KeyController {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
             List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
-            return Result.success("查询成功", count);
+            return Result.success(count);
         } else {
             return Result.errorMsg("未找到" + serverName);
         }
@@ -126,25 +129,26 @@ public class KeyController {
         redisUtil.setRedisTemplate(stringRedisTemplate);
         switch (type) {
             case SET:
-                redisUtil.sAdd(redisKey.getKeyName(), redisKey.getKeyValue());
+                redisUtil.sAdd(redisKey.getKeyName(), redisKey.getKeyValue().toString());
                 break;
             case HASH:
-                redisUtil.hPut(redisKey.getKeyName(), redisKey.getHashKey(), redisKey.getKeyValue());
+                redisUtil.hPut(redisKey.getKeyName(), redisKey.getHashKey(), redisKey.getKeyValue().toString());
                 break;
             case LIST:
-                redisUtil.lRightPush(redisKey.getKeyName(), redisKey.getKeyValue());
+                redisUtil.lRightPush(redisKey.getKeyName(), redisKey.getKeyValue().toString());
                 break;
             case STRING:
-                redisUtil.set(redisKey.getKeyName(), redisKey.getKeyValue());
+                redisUtil.set(redisKey.getKeyName(), redisKey.getKeyValue().toString());
                 break;
             case ZSET:
-                redisUtil.zAdd(redisKey.getKeyName(), redisKey.getKeyValue(), redisKey.getScore());
+                redisUtil.zAdd(redisKey.getKeyName(), redisKey.getKeyValue().toString(), redisKey.getScore());
                 break;
             default:
                 return Result.errorMsg("没有找到对应的类型");
         }
-        return Result.success("添加成功");
+        return Result.success();
     }
+
 
     @PostMapping("key/delete/{serverName}/{dbIndex}")
     public Result deleteKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody List<String> keyList) {
@@ -153,7 +157,26 @@ public class KeyController {
             return Result.errorMsg("获取StringRedisTemplate失败");
         }
         keyList.forEach(stringRedisTemplate::delete);
-        return Result.success("删除成功");
+        return Result.success();
+    }
+
+    @PutMapping("key/{serverName}/{dbIndex}/{oldKeyName}/{newKeyName}")
+    public Result rename(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("oldKeyName") String oldKeyName, @PathVariable("newKeyName") String newKeyName) {
+        StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
+        stringRedisTemplate.rename(oldKeyName, newKeyName);
+        return Result.success();
+    }
+
+    @PutMapping("key/ttl/{serverName}/{dbIndex}/{keyName}/{ttl}")
+    public Result updateTtl(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName, @PathVariable("ttl") Long ttl) {
+        StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
+        Boolean expire = stringRedisTemplate.expire(keyName, ttl, TimeUnit.SECONDS);
+        if (expire != null && expire) {
+            return Result.success();
+        } else {
+            return Result.errorMsg("设置ttl失败");
+        }
+
     }
 
 
