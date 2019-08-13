@@ -405,6 +405,9 @@
             this.getServerList();
         },
         methods: {
+            empty(str) {
+                return str == null || str === ""
+            },
             addServer() {
                 axios.post('/server', this.server)
                     .then((res) => {
@@ -463,10 +466,20 @@
                 }
             },
             openRenameDialog() {
+                if (this.empty(this.serverName) || this.empty(this.dbIndex) || this.empty(this.keyName)) {
+                    return false;
+                }
                 this.newKeyName = this.keyName;
                 this.renameKeyVisible = true;
             },
             rename() {
+                if (this.newKeyName == null || this.newKeyName === '') {
+                    this.$message({
+                        message: '名称不能为空',
+                        type: 'warning'
+                    });
+                    return;
+                }
                 axios.put(`/key/${this.serverName}/${this.dbIndex}/${this.keyName}/${this.newKeyName}`)
                     .then((res) => {
                         this.renameKeyVisible = false;
@@ -714,10 +727,10 @@
             saveKey() {
 
             },
-            handleSizeChange(){
+            handleSizeChange() {
 
             },
-            handleCurrentChange(){
+            handleCurrentChange() {
 
             }
 

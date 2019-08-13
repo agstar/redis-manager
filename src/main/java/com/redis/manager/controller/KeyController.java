@@ -13,10 +13,8 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.redis.manager.util.Const.*;
@@ -40,9 +38,11 @@ public class KeyController {
             Set<RedisKey> binaryKeys = new HashSet<>();
             Cursor<byte[]> cursor = redisConnection.scan(SCAN_OPTIONS);
             while (cursor.hasNext()) {
-                String key = new String(cursor.next());
+                byte[] next = cursor.next();
+                String key = new String(next, StandardCharsets.UTF_8);
+                String base64Key = Base64.getEncoder().encodeToString(next);
                 String type = Optional.ofNullable(stringRedisTemplate.type(key)).map(DataType::code).orElse(null);
-                binaryKeys.add(RedisKey.builder().keyName(key).type(type).build());
+                binaryKeys.add(RedisKey.builder().keyName(key).type(type).base64KeyName(base64Key).build());
             }
             return binaryKeys;
         });
@@ -70,36 +70,43 @@ public class KeyController {
      * @author agstar
      * @date 2019/6/13 21:14
      */
-    @GetMapping("key/{serverName}/{dbIndex}/{keyName}")
-    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName) {
+    @GetMapping("key/{serverName}/{dbIndex}/{base64keyName}")
+    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
-        DataType type = stringRedisTemplate.type(keyName);
-        Long expire = stringRedisTemplate.getExpire(keyName);
-        Object value = null;
-        if (type != null) {
-            switch (type) {
-                case SET:
-                    value = stringRedisTemplate.opsForSet().pop(keyName);
-                    break;
-                case HASH:
-                    value = stringRedisTemplate.opsForHash().entries(keyName);
-                    break;
-                case LIST:
-                    value = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
-                    break;
-                case STRING:
-                    value = stringRedisTemplate.opsForValue().get(keyName);
-                    break;
-                case NONE:
-                    break;
-                case ZSET:
-                    value = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
-                    break;
-                default:
-                    break;
+
+       RedisKey redisKey = null; /*stringRedisTemplate.execute((RedisCallback<RedisKey>) connection -> {
+            byte[] keyName = Base64.getDecoder().decode(base64keyName);
+            DataType type = connection.type(keyName);
+            Long ttl = connection.ttl(keyName);
+            Object value = null;
+            RedisKey result = RedisKey.builder().keyValue(value).ttl(Optional.ofNullable(ttl).orElse(-1L)).build();
+            if (type != null) {
+                switch (type) {
+                    case SET:
+                        value = connection.get(keyName);
+                        break;
+                    case HASH:
+                        value = stringRedisTemplate.opsForHash().entries(keyName);
+                        //stringRedisTemplate.opsForHash().get()
+                        break;
+                    case LIST:
+                        value = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
+                        break;
+                    case STRING:
+                        value = stringRedisTemplate.opsForValue().get(keyName);
+                        break;
+                    case NONE:
+                        break;
+                    case ZSET:
+                        value = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
+                        break;
+                    default:
+                        break;
+                }
             }
-        }
-        RedisKey redisKey = RedisKey.builder().keyValue(value).ttl(Optional.ofNullable(expire).orElse(-1L)).build();
+            return result;
+        });*/
+
         return Result.success(redisKey);
     }
 
