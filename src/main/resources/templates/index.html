@@ -139,16 +139,32 @@
                                 </el-table>
                             </el-col>
                             <el-col :span="8">
-                                <el-pagination
-                                        @size-change="handleSizeChange"
-                                        @current-change="handleCurrentChange"
-                                        :current-page="3"
-                                        :page-sizes="[100, 200, 300, 400]"
-                                        :page-size="100"
-                                        layout="total, sizes, prev, pager, next, jumper"
-                                        :total="400">
-                                </el-pagination>
+                                <el-form>
+                                    <el-form-item>
+                                        <el-input v-model="listsearch" placeholder="列表搜索"></el-input>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button>Add Row</el-button>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button>Delete Row</el-button>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button>Relaod Row</el-button>
+                                    </el-form-item>
+                                </el-form>
                             </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-pagination
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    :current-page="3"
+                                    :page-sizes="[100, 200, 300, 400]"
+                                    :page-size="100"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="400">
+                            </el-pagination>
                         </el-row>
                         <el-row>
                             <el-form>

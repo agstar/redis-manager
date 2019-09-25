@@ -2,6 +2,7 @@ package com.redis.manager.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.redis.manager.entity.Result;
+import com.redis.manager.handle.RedisConfiguration;
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
 import com.redis.manager.util.RedisServerUtil;
@@ -22,6 +23,8 @@ import static com.redis.manager.util.Const.*;
 @RestController
 public class KeyController {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
+
+    private RedisConfiguration redisConfiguration;
 
     /**
      * 获取dbindex中的所有key
@@ -70,42 +73,14 @@ public class KeyController {
      * @author agstar
      * @date 2019/6/13 21:14
      */
-    @GetMapping("key/{serverName}/{dbIndex}/{base64keyName}")
-    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("base64keyName") String base64keyName) {
+    @GetMapping("key/{serverName}/{dbIndex}/{keyName}/{base64keyName}")
+    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex,
+                           @PathVariable("keyName") String keyName,
+                           @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
 
-       RedisKey redisKey = null; /*stringRedisTemplate.execute((RedisCallback<RedisKey>) connection -> {
-            byte[] keyName = Base64.getDecoder().decode(base64keyName);
-            DataType type = connection.type(keyName);
-            Long ttl = connection.ttl(keyName);
-            Object value = null;
-            RedisKey result = RedisKey.builder().keyValue(value).ttl(Optional.ofNullable(ttl).orElse(-1L)).build();
-            if (type != null) {
-                switch (type) {
-                    case SET:
-                        value = connection.get(keyName);
-                        break;
-                    case HASH:
-                        value = stringRedisTemplate.opsForHash().entries(keyName);
-                        //stringRedisTemplate.opsForHash().get()
-                        break;
-                    case LIST:
-                        value = stringRedisTemplate.opsForList().range(keyName, 0, 1000);
-                        break;
-                    case STRING:
-                        value = stringRedisTemplate.opsForValue().get(keyName);
-                        break;
-                    case NONE:
-                        break;
-                    case ZSET:
-                        value = stringRedisTemplate.opsForZSet().range(keyName, 0, 1000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return result;
-        });*/
+        RedisKey redisKey = null;
+        Object value1 = redisConfiguration.getHandler("").getValue(redisKey, stringRedisTemplate);
 
         return Result.success(redisKey);
     }

@@ -1,8 +1,8 @@
 package com.redis.manager.model;
 
 
-import lombok.*;
-import org.springframework.data.redis.connection.DataType;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
