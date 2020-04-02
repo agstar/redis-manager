@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @AllArgsConstructor
-@Configuration
+//@Configuration
 public class RedisConfiguration {
     private final HashValueHandler hashValueHandler;
     private final SetValueHandler setValueHandler;

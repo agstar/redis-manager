@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -29,7 +29,7 @@ import static com.redis.manager.util.Const.*;
  * @author agstar
  */
 @Component
-@Log4j
+@Slf4j
 public class RedisServerUtil {
     private static final Pattern PATTERN = Pattern.compile("keys=(\\d*)");
 
