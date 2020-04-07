@@ -11,7 +11,7 @@ public class RedisManageApplicationTests {
     @Test
     public void contextLoads() {
         String key = "a:b:c:d";
-        String[] keys = {"a:b:c:d", "a:b:c", "a:b:c:e", "a:b:d:d"};
+        String[] keys = {"a","a:b:c:d", "a:b:c", "a:b:c:e", "a:b:d:d"};
         JSONArray json = new JSONArray();
         for (String s : keys) {
             json = getKeyTree2(s, json);

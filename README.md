@@ -9,12 +9,13 @@
 
 #### 运行方式
 默认启动端口**11000**
+
 修改端口请到src/main/resources/application.properties修改server.port
-或者运行时指定`--server.port=xxx`
+或者运行时指定`--server.port=xxx`,在启动脚本中start中添加参数
 
 + 下载源码
 + Maven打包编译
- `mvn package`
+ `mvn clean package`
 
 当项目完成 后续会考虑docker方式部署 
 

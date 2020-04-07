@@ -124,9 +124,9 @@
                                         max-height="430"
                                         style="width: 100%">
                                     <el-table-column
-                                            prop="row"
+                                            type="index"
                                             label="行"
-                                            width="100">
+                                            width="50">
                                     </el-table-column>
                                     <el-table-column
                                             prop="value"
@@ -362,56 +362,53 @@
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: [],
-            keys: [],
+            keys: [{
+                "children": [{
+                    "children": [{
+                        "children": [{"label": "a:b:c:d"}, {"label": "a:b:c:e"}],
+                        "label": "c"
+                    }, {"label": "a:b:c"}, {"children": [{"label": "a:b:d:d"}], "label": "d"}], "label": "b"
+                }], "label": "a"
+            }],
             defaultProps: {
                 children: 'children',
                 label: 'label'
             },
             tableData: [{
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1518 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1517 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1519 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
             }, {
-                row: '1',
                 value: '王小虎',
                 address: '上海市普陀区金沙江路 1516 弄'
-            }]
+            }],
+            listsearch: null,
         },
         created() {
             console.log('created')
@@ -456,7 +453,6 @@
                 this.key.hashKey = '';
                 this.key.score = null;
                 this.key.keyValue = null;
-
             },
             ping() {
                 axios.post('/ping', this.server)
