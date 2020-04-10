@@ -7,13 +7,29 @@
 #### 特点
  + 支持多个Redis节点
 
+### 运行要求
++ Java8及以上
++ Maven3
+
 #### 运行方式
 默认启动端口**11000**
 
-修改端口请到src/main/resources/application.properties修改server.port
+修改端口请到`src/main/resources/application.properties`修改`server.port`
 或者运行时指定`--server.port=xxx`,在启动脚本中start中添加参数
+```
+下载源码
+git clone xxx
 
-+ 下载源码
+根据服务器类型运行start脚本
+./start
+
+
+Maven打包编译
+mvn clean package
+
+
+```
++ 
 + Maven打包编译
  `mvn clean package`
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,11 +33,11 @@ import static com.redis.manager.util.Const.*;
 @Slf4j
 public class RedisServerUtil {
     private static final Pattern PATTERN = Pattern.compile("keys=(\\d*)");
-
+    private static final String PROJECT_PATH = System.getProperty("user.dir");
     /**
      * 存储redis server的文件
      */
-    private static String serverPath = "server/redisServer.json";
+    private static String serverPath = PROJECT_PATH + "/server.json";
     private static Resource resource = new ClassPathResource(serverPath);
 
     /**
@@ -98,7 +99,7 @@ public class RedisServerUtil {
         File file;
         try {
             file = resource.getFile();
-            String json = FileUtils.readFileToString(file, CHARACTER);
+            String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             if (StringUtils.isNotBlank(json)) {
                 List<RedisServer> redisServers = JSON.parseArray(json, RedisServer.class);
                 REDIS_SERVER.addAll(redisServers);
