@@ -12,8 +12,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 
+/**
+ * @author agstar
+ */
 @RestController
-public class RedisController {
+public class ServerController {
 
 
     /**
@@ -22,13 +25,13 @@ public class RedisController {
      * @param redisServer 添加的reids服务信息
      */
     @PostMapping("server")
-    public Result addServer(@RequestBody RedisServer redisServer) {
+    public Result<Void> addServer(@RequestBody RedisServer redisServer) {
         RedisServerUtil.addServer(redisServer);
         return Result.successMsg("添加成功");
     }
 
     @PostMapping("ping")
-    public Result testConnection(@RequestBody RedisServer redisServer) {
+    public Result<String> testConnection(@RequestBody RedisServer redisServer) {
         String pong = RedisServerUtil.ping(redisServer);
         if (StringUtils.equalsIgnoreCase(pong, "pong")) {
             return Result.success(pong);
@@ -39,19 +42,19 @@ public class RedisController {
 
 
     @DeleteMapping("server/{id}")
-    public Result deleteServer(@PathVariable("id") Long id) {
+    public Result<Void> deleteServer(@PathVariable("id") Long id) {
         RedisServerUtil.deleteServer(id);
         return Result.successMsg("添加成功");
     }
 
     @PutMapping("server/{id}")
-    public Result updateServer(@PathVariable() Long id, @RequestBody RedisServer redisServer) {
+    public Result<Void> updateServer(@PathVariable() Long id, @RequestBody RedisServer redisServer) {
         RedisServerUtil.updateServer(id, redisServer);
         return Result.successMsg("修改成功");
     }
 
     @GetMapping("server")
-    public Result getAllServer() {
+    public Result<Set<RedisServer>> getAllServer() {
         Set<RedisServer> serverSet = new LinkedHashSet<>(Const.REDIS_SERVER);
         serverSet.forEach(x -> x.setAuth(""));
         return Result.success("查询成功", serverSet);

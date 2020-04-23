@@ -2,7 +2,7 @@ package com.redis.manager.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.redis.manager.entity.Result;
-import com.redis.manager.handle.RedisConfiguration;
+import com.redis.manager.handle.RedisContextHolder;
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
 import com.redis.manager.util.RedisServerUtil;
@@ -24,7 +24,7 @@ import static com.redis.manager.util.Const.*;
 public class KeyController {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
 
-    private RedisConfiguration redisConfiguration;
+    private RedisContextHolder redisContextHolder;
 
     /**
      * 获取dbindex中的所有key
@@ -33,7 +33,7 @@ public class KeyController {
      * @date 2019/6/13 21:13
      */
     @GetMapping("key/{serverName}/{dbIndex}")
-    public Result getKeyList(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex) {
+    public Result<JSONArray> getKeyList(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         //scan 0 MATCH * COUNT 10000
         //加载初始化 template，点击server加载template
@@ -73,16 +73,15 @@ public class KeyController {
      * @author agstar
      * @date 2019/6/13 21:14
      */
-    @GetMapping("key/{serverName}/{dbIndex}/{keyName}/{base64keyName}")
-    public Result getValue(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex,
-                           @PathVariable("keyName") String keyName,
+    @GetMapping("value/{serverName}/{dbIndex}/{type}/{base64keyName}")
+    public Result<Object> getValue(@PathVariable("serverName") String serverName,
+                           @PathVariable("dbIndex") int dbIndex,
+                           @PathVariable("type") String type,
                            @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
-
-        RedisKey redisKey = null;
-        Object value1 = redisConfiguration.getHandler("").getValue(redisKey, stringRedisTemplate);
-
-        return Result.success(redisKey);
+        //stringRedisTemplate.opsForValue().get()
+        Object value = redisContextHolder.getHandler(type).getValue(base64keyName, stringRedisTemplate);
+        return Result.success(value);
     }
 
     /**
@@ -133,7 +132,7 @@ public class KeyController {
 
 
     @PostMapping("key/delete/{serverName}/{dbIndex}")
-    public Result deleteKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody List<String> keyList) {
+    public Result<Void> deleteKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody List<String> keyList) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         if (stringRedisTemplate == null) {
             return Result.errorMsg("获取StringRedisTemplate失败");
@@ -143,14 +142,14 @@ public class KeyController {
     }
 
     @PutMapping("key/{serverName}/{dbIndex}/{oldKeyName}/{newKeyName}")
-    public Result rename(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("oldKeyName") String oldKeyName, @PathVariable("newKeyName") String newKeyName) {
+    public Result<Void> rename(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("oldKeyName") String oldKeyName, @PathVariable("newKeyName") String newKeyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         stringRedisTemplate.rename(oldKeyName, newKeyName);
         return Result.success();
     }
 
     @PutMapping("key/ttl/{serverName}/{dbIndex}/{keyName}/{ttl}")
-    public Result updateTtl(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName, @PathVariable("ttl") Long ttl) {
+    public Result<Void> updateTtl(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName, @PathVariable("ttl") Long ttl) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         Boolean expire = stringRedisTemplate.expire(keyName, ttl, TimeUnit.SECONDS);
         if (expire != null && expire) {

@@ -1,22 +1,27 @@
 package com.redis.manager.handle;
 
+import com.redis.manager.model.RedisKey;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.DataType;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author agstar
+ */
 @AllArgsConstructor
-//@Configuration
-public class RedisConfiguration {
+public class RedisContextHolder {
     private final HashValueHandler hashValueHandler;
     private final SetValueHandler setValueHandler;
     private final StringValueHandler stringValueHandler;
     private final ZsetValueHandler zsetValueHandler;
     private final ListValueHandler listValueHandler;
-    Map<String, RedisValueHandler> container = new HashMap<>();
+    private final TypeHandler typeHandler;
+    Map<String, RedisValueHandler> container;
 
     @PostConstruct
     private void register() {
@@ -29,6 +34,11 @@ public class RedisConfiguration {
 
     public RedisValueHandler getHandler(String type){
         return container.get(type);
+    }
+
+    public RedisValueHandler defaultHandler(String base64keyName, StringRedisTemplate stringRedisTemplate){
+        RedisKey redisKey = typeHandler.getRedisKey(base64keyName, stringRedisTemplate);
+        return container.get(redisKey.getType());
     }
 
 }

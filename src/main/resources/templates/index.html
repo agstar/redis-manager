@@ -275,6 +275,9 @@
                     <el-option label="15" value="15"></el-option>
                 </el-select>
             </el-form-item>
+            <video>
+                <audio></audio>
+            </video>
             <el-form-item label="类型" :label-width="formLabelWidth">
                 <el-select v-model="key.type" placeholder="类型">
                     <el-option label="STRING" value="string"></el-option>
@@ -362,14 +365,7 @@
             formLabelWidth: '120px',
             serverKeys: [],
             serverList: [],
-            keys: [{
-                "children": [{
-                    "children": [{
-                        "children": [{"label": "a:b:c:d"}, {"label": "a:b:c:e"}],
-                        "label": "c"
-                    }, {"label": "a:b:c"}, {"children": [{"label": "a:b:d:d"}], "label": "d"}], "label": "b"
-                }], "label": "a"
-            }],
+            keys: [{"label":"a"},{"children":[{"label":"a:b"},{"children":[{"children":[{"label":"a:b:c:d"},{"label":"a:b:c:e"}],"label":"c"},{"label":"a:b:c"},{"children":[{"label":"a:b:d:d"}],"label":"d"}],"label":"b"}],"label":"a"},{"children":[{"label":"h:g"}],"label":"h"}],
             defaultProps: {
                 children: 'children',
                 label: 'label'

@@ -20,6 +20,6 @@ public class BaseExceptionHandler {
     @ResponseBody
     public Result error(Exception e) {
         log.error("执行失败", e);
-        return Result.errorMsg("执行失败");
+        return Result.errorMsg(e.getMessage());
     }
 }
