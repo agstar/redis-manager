@@ -7,6 +7,7 @@ import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
 import com.redis.manager.util.RedisServerUtil;
 import com.redis.manager.util.RedisUtil;
+import lombok.AllArgsConstructor;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
@@ -20,11 +21,14 @@ import java.util.concurrent.TimeUnit;
 
 import static com.redis.manager.util.Const.*;
 
+/**
+ * @author agstar
+ */
 @RestController
+@AllArgsConstructor
 public class KeyController {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
-
-    private RedisContextHolder redisContextHolder;
+    private final RedisContextHolder redisContextHolder;
 
     /**
      * 获取dbindex中的所有key
@@ -79,7 +83,6 @@ public class KeyController {
                            @PathVariable("type") String type,
                            @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
-        //stringRedisTemplate.opsForValue().get()
         Object value = redisContextHolder.getHandler(type).getValue(base64keyName, stringRedisTemplate);
         return Result.success(value);
     }
