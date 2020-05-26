@@ -1,27 +1,28 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author agstar
  */
 @AllArgsConstructor
+@Component
 public class RedisContextHolder {
     private final HashValueHandler hashValueHandler;
     private final SetValueHandler setValueHandler;
     private final StringValueHandler stringValueHandler;
-    private final ZsetValueHandler zsetValueHandler;
+    private final ZSetValueHandler zsetValueHandler;
     private final ListValueHandler listValueHandler;
     private final TypeHandler typeHandler;
-    Map<String, RedisValueHandler> container;
+    private static final Map<String, RedisValueHandler> container = new ConcurrentHashMap<>(16);
 
     @PostConstruct
     private void register() {

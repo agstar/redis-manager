@@ -1,12 +1,7 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
-import org.springframework.data.redis.connection.DataType;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.util.Base64;
-import java.util.Optional;
 
 public class DefaultValueHander  implements RedisValueHandler {
 

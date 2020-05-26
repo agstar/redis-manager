@@ -10,12 +10,19 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.redis.connection.RedisConnectionCommands;
+import org.springframework.data.redis.connection.ReactiveRedisConnection;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.ReactiveRedisCallback;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +46,8 @@ public class RedisServerUtil {
      */
     private static String serverPath = PROJECT_PATH + "/server.json";
     private static Resource resource = new ClassPathResource(serverPath);
+    private static File serverFile = new File(serverPath);
+
 
     /**
      * 将redisServer写入到文件中
@@ -48,7 +57,7 @@ public class RedisServerUtil {
     public static synchronized void addServer(RedisServer redisServer) {
         try {
             REDIS_SERVER.add(redisServer);
-            File file = resource.getFile();
+            File file = serverFile;
             String json = FileUtils.readFileToString(file, CHARACTER);
             if (StringUtils.isNotBlank(json)) {
                 json = JSON.toJSONString(REDIS_SERVER);
@@ -63,7 +72,7 @@ public class RedisServerUtil {
         try {
             boolean remove = REDIS_SERVER.removeIf(x -> x.getId().equals(id));
             if (remove) {
-                File file = resource.getFile();
+                File file = serverFile;
                 String json = FileUtils.readFileToString(file, CHARACTER);
                 if (StringUtils.isNotBlank(json)) {
                     json = JSON.toJSONString(REDIS_SERVER);
@@ -98,7 +107,7 @@ public class RedisServerUtil {
     public static void readAllServer() {
         File file;
         try {
-            file = resource.getFile();
+            file = serverFile;
             String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             if (StringUtils.isNotBlank(json)) {
                 List<RedisServer> redisServers = JSON.parseArray(json, RedisServer.class);
@@ -109,29 +118,16 @@ public class RedisServerUtil {
         }
     }
 
-    /**
-     * 初始化加载所有key数量
-     *
-     * @author rcl
-     * @date 2019/1/28 9:40
-     */
-    public static void initKeyCount() {
-        for (RedisServer redisServer : REDIS_SERVER) {
-            List<Integer> count = getRedisKeyCount(redisServer);
-            REDIS_KEY_COUNT.put(redisServer.getName(), count);
-        }
-    }
-
     public static List<Integer> getRedisKeyCount(RedisServer redisServer) {
-        StringRedisTemplate stringRedisTemplate = RedisServerUtil.initRedisConnection(redisServer, 0);
+        ReactiveStringRedisTemplate stringRedisTemplate = RedisServerUtil.initRedisConnection(redisServer, 0);
         return initRedisKeysCache(stringRedisTemplate);
     }
 
     /**
      * 初始化redis连接
      */
-    public static StringRedisTemplate initRedisConnection(RedisServer redisServer, int dbIndex) {
-        StringRedisTemplate stringRedisTemplate = null;
+    public static ReactiveStringRedisTemplate initRedisConnection(RedisServer redisServer, int dbIndex) {
+        ReactiveStringRedisTemplate ReactiveStringRedisTemplate = null;
         try {
             //初始化redis连接
             RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
@@ -142,17 +138,16 @@ public class RedisServerUtil {
                 configuration.setPassword(redisServer.getAuth());
             }
             configuration.setDatabase(dbIndex);
-            LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
-            factory.afterPropertiesSet();
-            stringRedisTemplate = new StringRedisTemplate();
-            stringRedisTemplate.setConnectionFactory(factory);
-            stringRedisTemplate.afterPropertiesSet();
-            factory.getConnection().close();
+
+            ReactiveRedisConnectionFactory reactiveRedisConnectionFactory = new LettuceConnectionFactory(configuration);
+            RedisSerializationContext.RedisSerializationContextBuilder<String, String> builder = RedisSerializationContext.newSerializationContext(new StringRedisSerializer());
+            RedisSerializationContext<String, String> serializationContex = builder.build();
+            ReactiveStringRedisTemplate = new ReactiveStringRedisTemplate(reactiveRedisConnectionFactory, serializationContex);
+            reactiveRedisConnectionFactory.getReactiveConnection().close();
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         }
-        return stringRedisTemplate;
+        return ReactiveStringRedisTemplate;
     }
 
     private static List<Integer> initRedisKeysCache(StringRedisTemplate stringRedisTemplate) {
@@ -179,13 +174,36 @@ public class RedisServerUtil {
         });
     }
 
-    public static String ping(RedisServer redisServer) {
+    private static List<Integer> initRedisKeysCache(ReactiveStringRedisTemplate ReactiveStringRedisTemplate) {
+        return ReactiveStringRedisTemplate.execute(reactiveRedisConnection -> reactiveRedisConnection.serverCommands()
+                .info()
+                .flatMap(properties -> {
+                    List<Integer> keyCountList = new ArrayList<>(16);
+                    for (int i = 0; i < 16; i++) {
+                        String keys = properties.getProperty("db" + i);
+                        int keyCount = 0;
+                        if (keys != null) {
+                            Matcher matcher = PATTERN.matcher(keys);
+                            if (matcher.find()) {
+                                String keyCountStr = matcher.group(1);
+                                keyCount = Integer.parseInt(keyCountStr);
+                            }
+
+                        }
+                        keyCountList.add(keyCount);
+                    }
+                    return Mono.just(keyCountList);
+                })).blockFirst();
+    }
+
+
+    public static Mono<String> ping(RedisServer redisServer) {
         //初始化redis连接
         try {
-            StringRedisTemplate stringRedisTemplate = initRedisConnection(redisServer, 0);
-            return stringRedisTemplate.execute(RedisConnectionCommands::ping);
+            ReactiveStringRedisTemplate reactiveStringRedisTemplate = initRedisConnection(redisServer, 0);
+            return Mono.from(reactiveStringRedisTemplate.execute(ReactiveRedisConnection::ping));
         } catch (Exception e) {
-            return e.getMessage();
+            return Mono.just(e.getMessage());
         }
     }
 

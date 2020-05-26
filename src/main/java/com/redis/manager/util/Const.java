@@ -1,16 +1,21 @@
 package com.redis.manager.util;
 
 import com.redis.manager.model.RedisServer;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 常量配置类
+ *
+ * @author agstar
+ */
 public interface Const {
 
     Set<RedisServer> REDIS_SERVER = new LinkedHashSet<>();
-    Map<String, Integer> REDIS_KEYS_LISTMAP = new HashMap<>();
-    Map<String,List<Integer>> REDIS_KEY_COUNT = new HashMap<>();
-    Map<String, StringRedisTemplate> REDIS_TEMPLATE_MAP = new HashMap<>();
+    Map<String, ReactiveStringRedisTemplate> REDIS_TEMPLATE_MAP = new ConcurrentHashMap<>(16);
     /**
      * 文件统一编码
      */

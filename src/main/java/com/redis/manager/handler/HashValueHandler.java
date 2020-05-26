@@ -1,14 +1,15 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-
+@Component
 public class HashValueHandler implements RedisValueHandler {
 
     @Override

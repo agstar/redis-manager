@@ -2,9 +2,10 @@ package com.redis.manager.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.redis.manager.entity.Result;
-import com.redis.manager.handle.RedisContextHolder;
+import com.redis.manager.handler.RedisContextHolder;
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.model.RedisServer;
+import com.redis.manager.service.RedisService;
 import com.redis.manager.util.RedisServerUtil;
 import com.redis.manager.util.RedisUtil;
 import lombok.AllArgsConstructor;
@@ -26,9 +27,10 @@ import static com.redis.manager.util.Const.*;
  */
 @RestController
 @AllArgsConstructor
-public class KeyController {
+public class RedisController {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
     private final RedisContextHolder redisContextHolder;
+    private final RedisService redisService;
 
     /**
      * 获取dbindex中的所有key
@@ -60,16 +62,6 @@ public class KeyController {
         return Result.success(jsonArray);
     }
 
-    private StringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {
-        StringRedisTemplate stringRedisTemplate = REDIS_TEMPLATE_MAP.get(serverName + DEFAULT_SEPARATOR + dbIndex);
-        if (stringRedisTemplate == null) {
-            Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
-            if (first.isPresent()) {
-                return RedisServerUtil.initRedisConnection(first.get(), dbIndex);
-            }
-        }
-        throw new RuntimeException("初始化StringRedisTemplate失败");
-    }
 
     /**
      * 获取value的值
@@ -79,13 +71,19 @@ public class KeyController {
      */
     @GetMapping("value/{serverName}/{dbIndex}/{type}/{base64keyName}")
     public Result<Object> getValue(@PathVariable("serverName") String serverName,
-                           @PathVariable("dbIndex") int dbIndex,
-                           @PathVariable("type") String type,
-                           @PathVariable("base64keyName") String base64keyName) {
+                                   @PathVariable("dbIndex") int dbIndex,
+                                   @PathVariable("type") String type,
+                                   @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         Object value = redisContextHolder.getHandler(type).getValue(base64keyName, stringRedisTemplate);
         return Result.success(value);
     }
+
+    public Result<Object> getValue(RedisKey redisKey) {
+        Object object = redisService.getValue(redisKey);
+        return Result.success(object);
+    }
+
 
     /**
      * 获取16个数据库中的key数量
@@ -94,7 +92,7 @@ public class KeyController {
      * @date 2019/6/13 22:37
      */
     @GetMapping("keyCount/{serverName}")
-    public Result getKeyCount(@PathVariable("serverName") String serverName) {
+    public Result<List<Integer>> getKeyCount(@PathVariable("serverName") String serverName) {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
         if (first.isPresent()) {
             List<Integer> count = RedisServerUtil.getRedisKeyCount(first.get());
@@ -105,9 +103,18 @@ public class KeyController {
     }
 
 
+    /**
+     * 添加记录
+     *
+     * @param serverName server name
+     * @param dbIndex    db index
+     * @param redisKey   key 相关
+     * @return msg
+     * @author agstar
+     * @date 2020/5/26 19:56
+     */
     @PostMapping("key/{serverName}/{dbIndex}")
-    public Result addKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody RedisKey redisKey) {
-        StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
+    public Result<Void> addKey(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @RequestBody RedisKey redisKey) {
         DataType type = DataType.fromCode(redisKey.getType());
         RedisUtil redisUtil = new RedisUtil();
         redisUtil.setRedisTemplate(stringRedisTemplate);
@@ -144,6 +151,15 @@ public class KeyController {
         return Result.success();
     }
 
+    /**
+     * 重命名key
+     *
+     * @param serverName server name
+     * @param dbIndex    db index
+     * @param oldKeyName old key
+     * @param newKeyName new key
+     * @return msg
+     */
     @PutMapping("key/{serverName}/{dbIndex}/{oldKeyName}/{newKeyName}")
     public Result<Void> rename(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("oldKeyName") String oldKeyName, @PathVariable("newKeyName") String newKeyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
@@ -151,6 +167,16 @@ public class KeyController {
         return Result.success();
     }
 
+    /**
+     * 设置ttl
+     *
+     * @param serverName server name
+     * @param dbIndex    db index
+     * @param keyName    key name
+     * @return msg
+     * @author agstar
+     * @date 2020/5/26 19:58
+     */
     @PutMapping("key/ttl/{serverName}/{dbIndex}/{keyName}/{ttl}")
     public Result<Void> updateTtl(@PathVariable("serverName") String serverName, @PathVariable("dbIndex") int dbIndex, @PathVariable("keyName") String keyName, @PathVariable("ttl") Long ttl) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);

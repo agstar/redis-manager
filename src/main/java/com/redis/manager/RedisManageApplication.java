@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author agstar
+ */
 @SpringBootApplication
 public class RedisManageApplication {
 

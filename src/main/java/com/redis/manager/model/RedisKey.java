@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class RedisKey {
+    private String serverName;
     private String keyName;
     private String type;
     /**

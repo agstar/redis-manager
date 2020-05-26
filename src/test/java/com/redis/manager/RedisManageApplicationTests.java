@@ -1,5 +1,6 @@
 package com.redis.manager;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -23,12 +24,13 @@ public class RedisManageApplicationTests {
         JSONArray json = new JSONArray();
         for (String s : keys) {
             System.out.println(s);
-            json = getKeyTree3(s, json);
+            //json = getKeyTree3(s, json);
         }
         System.out.println(json.toJSONString());
         JSONArray data = new JSONArray();
-        convertTree(json, null, data);
+//        convertTree(json, null, data);
         System.out.println(data.toJSONString());
+        StrUtil.format("","");
 //        HashMap<String, String> map = new HashMap<>();
 //        map.put("", "");
 //        map.get("");
@@ -38,7 +40,7 @@ public class RedisManageApplicationTests {
 
     }
 
-    private void convertTree(JSONArray json, String parent, JSONArray children) {
+    /*private void convertTree(JSONArray json, String parent, JSONArray children) {
         List<Object> parentList = json.stream().filter(x -> {
             var obj = (JSONObject) x;
             return StringUtils.equals(obj.getString("parent"), parent);
@@ -59,10 +61,10 @@ public class RedisManageApplicationTests {
                 convertTree(json, label, tempChildren);
             }
         });
-    }
+    }*/
 
 
-    public JSONArray getKeyTree3(String keyName, JSONArray dataArray) {
+    /*public JSONArray getKeyTree3(String keyName, JSONArray dataArray) {
         String[] keyArray = keyName.split(":");
         if (keyArray.length == 1) {
             JSONObject newObj = new JSONObject();
@@ -115,7 +117,7 @@ public class RedisManageApplicationTests {
         }
 
         return dataArray;
-    }
+    }*/
 
 
     public JSONArray getKeyTree2(String key, JSONArray dataArray) {
