@@ -40,13 +40,13 @@ public class RedisManageApplicationTests {
 
     private void convertTree(JSONArray json, String parent, JSONArray children) {
         List<Object> parentList = json.stream().filter(x -> {
-            var obj = (JSONObject) x;
+            JSONObject obj = (JSONObject) x;
             return StringUtils.equals(obj.getString("parent"), parent);
         }).collect(Collectors.toList());
         parentList.forEach(x -> {
-            var obj = (JSONObject) x;
+            JSONObject obj = (JSONObject) x;
             Boolean isLast = obj.getBoolean("isLast");
-            var jsonObject = new JSONObject();
+            JSONObject jsonObject = new JSONObject();
             String label = obj.getString("label");
             if (isLast) {
                 jsonObject.put("label", label);
@@ -74,13 +74,13 @@ public class RedisManageApplicationTests {
             for (int i = 0; i < keyArray.length; i++) {
                 String tempKeyName = keyArray[i];
                 List<Object> objectList = dataArray.stream().filter(o -> {
-                    var obj = (JSONObject) o;
-                    var label = obj.getString("label");
+                    JSONObject obj = (JSONObject) o;
+                    String label = obj.getString("label");
                     return label.equals(tempKeyName);
                 }).collect(Collectors.toList());
                 //最后一个
                 if (i == keyArray.length - 1) {
-                    var tempJSONObj = new JSONObject();
+                    JSONObject tempJSONObj = new JSONObject();
                     tempJSONObj.put("label", keyName);
                     tempJSONObj.put("isLast", true);
                     tempJSONObj.put("parent", lastKeyName);
@@ -90,11 +90,11 @@ public class RedisManageApplicationTests {
                 if (!CollectionUtils.isEmpty(objectList)) {
                     if (objectList.size() < 2) {
                         for (Object o : objectList) {
-                            var obj = (JSONObject) o;
-                            var isLast = obj.getBoolean("isLast");
+                            JSONObject obj = (JSONObject) o;
+                            Boolean isLast = obj.getBoolean("isLast");
                             //不是最后一个
                             if (isLast) {
-                                var tempJSONObj = new JSONObject();
+                                JSONObject tempJSONObj = new JSONObject();
                                 tempJSONObj.put("label", obj.getString("label"));
                                 tempJSONObj.put("parent", lastKeyName);
                                 tempJSONObj.put("isLast", false);
@@ -104,7 +104,7 @@ public class RedisManageApplicationTests {
                         }
                     }
                 } else {
-                    var tempJSONObj = new JSONObject();
+                    JSONObject tempJSONObj = new JSONObject();
                     tempJSONObj.put("label", tempKeyName);
                     tempJSONObj.put("parent", lastKeyName);
                     tempJSONObj.put("isLast", false);

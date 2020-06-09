@@ -16,6 +16,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.redis.manager.util.Const.*;
 
@@ -189,10 +191,126 @@ public class RedisServerUtil {
         }
     }
 
+
+    private static void convertTree(JSONArray json, String parent, JSONArray children) {
+        List<Object> parentList = json.stream().filter(x -> {
+            JSONObject obj = (JSONObject) x;
+            return StringUtils.equals(obj.getString("parent"), parent);
+        }).collect(Collectors.toList());
+        parentList.forEach(x -> {
+            JSONObject obj = (JSONObject) x;
+            Boolean isLast = obj.getBoolean("isLast");
+            JSONObject jsonObject = new JSONObject();
+            String label = obj.getString("label");
+            String index = obj.getString("index");
+            String type = obj.getString("type");
+            String base64KeyName = obj.getString("base64KeyName");
+            if (isLast) {
+                jsonObject.put("label", label);
+                jsonObject.put("index", index);
+                jsonObject.put("type", type);
+                jsonObject.put("base64KeyName", base64KeyName);
+                children.add(jsonObject);
+            } else {
+                jsonObject.put("label", label);
+                jsonObject.put("index", index);
+                jsonObject.put("type", type);
+                jsonObject.put("base64KeyName", base64KeyName);
+                JSONArray tempChildren = new JSONArray();
+                jsonObject.put("children", tempChildren);
+                children.add(jsonObject);
+                convertTree(json, label, tempChildren);
+            }
+        });
+    }
+
+
+    private static JSONArray getKeyTree3(RedisKey redisKey, JSONArray dataArray, String index) {
+        String keyName = redisKey.getKeyName();
+        String base64KeyName = redisKey.getBase64KeyName();
+        String type = redisKey.getType();
+        String[] keyArray = keyName.split(":");
+        if (keyArray.length == 1) {
+            JSONObject newObj = new JSONObject();
+            newObj.put("label", keyName);
+            newObj.put("index", index);
+            newObj.put("base64KeyName", base64KeyName);
+            newObj.put("type", type);
+            newObj.put("isLast", true);
+            dataArray.add(newObj);
+        } else {
+            String lastKeyName = null;
+            for (int i = 0; i < keyArray.length; i++) {
+                String tempKeyName = keyArray[i];
+                List<Object> objectList = dataArray.stream().filter(o -> {
+                    JSONObject obj = (JSONObject) o;
+                    String label = obj.getString("label");
+                    return label.equals(tempKeyName);
+                }).collect(Collectors.toList());
+                //最后一个
+                if (i == keyArray.length - 1) {
+                    JSONObject tempjsonobj = new JSONObject();
+                    tempjsonobj.put("label", keyName);
+                    tempjsonobj.put("index", index);
+                    tempjsonobj.put("base64KeyName", base64KeyName);
+                    tempjsonobj.put("isLast", true);
+                    tempjsonobj.put("type", type);
+                    tempjsonobj.put("parent", lastKeyName);
+                    dataArray.add(tempjsonobj);
+                    break;
+                }
+                if (!CollectionUtils.isEmpty(objectList)) {
+                    if (objectList.size() < 2) {
+                        for (Object o : objectList) {
+                            JSONObject obj = (JSONObject) o;
+                            Boolean isLast = obj.getBoolean("isLast");
+                            //不是最后一个
+                            if (isLast) {
+                                JSONObject tempJSONObj = new JSONObject();
+                                tempJSONObj.put("label", obj.getString("label"));
+                                tempJSONObj.put("parent", lastKeyName);
+                                tempJSONObj.put("index", index);
+                                tempJSONObj.put("type", type);
+                                tempJSONObj.put("base64KeyName", base64KeyName);
+                                tempJSONObj.put("isLast", false);
+                                dataArray.add(tempJSONObj);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    JSONObject tempJSONObj = new JSONObject();
+                    tempJSONObj.put("label", tempKeyName);
+                    tempJSONObj.put("parent", lastKeyName);
+                    tempJSONObj.put("index", index);
+                    tempJSONObj.put("base64KeyName", base64KeyName);
+                    tempJSONObj.put("isLast", false);
+                    dataArray.add(tempJSONObj);
+                }
+                lastKeyName = tempKeyName;
+            }
+        }
+
+        return dataArray;
+    }
+
     /**
      * 递归获取树形菜单
      */
-    public static void getKeyTree(RedisKey redisKey, JSONArray jsonArray, String serverName, int dbIndex) {
+    public static JSONArray getKeyTree(Set<RedisKey> keys, String serverName, int dbIndex) {
+        JSONArray data = new JSONArray();
+        if (keys != null) {
+            String index = serverName + ":" + dbIndex;
+            JSONArray dataArray = new JSONArray();
+            for (RedisKey redisKey : keys) {
+                getKeyTree3(redisKey, dataArray, index);
+            }
+            convertTree(dataArray, null, data);
+        }
+        return data;
+    }
+
+    public static void getKeyTree2(RedisKey redisKey, JSONArray jsonArray, String serverName, int dbIndex) {
         String index = serverName + ":" + dbIndex;
         //JSONArray temp = jsonArray;
         String key = redisKey.getKeyName();

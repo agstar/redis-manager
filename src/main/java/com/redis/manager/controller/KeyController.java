@@ -53,11 +53,8 @@ public class KeyController {
             }
             return binaryKeys;
         });
-        JSONArray jsonArray = new JSONArray();
-        if (keys != null) {
-            keys.forEach(x -> RedisServerUtil.getKeyTree(x, jsonArray, serverName, dbIndex));
-        }
-        return Result.success(jsonArray);
+        JSONArray keyTree = RedisServerUtil.getKeyTree(keys, serverName, dbIndex);
+        return Result.success(keyTree);
     }
 
     private StringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {

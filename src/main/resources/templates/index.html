@@ -634,7 +634,7 @@
                 }
             },
             getValue(serverName, dbIndex, key, type) {
-                axios.get(`/key/${serverName}/${dbIndex}/${key}`)
+                axios.get(`/value/${serverName}/${dbIndex}/${type}/${key}`)
                     .then((res) => {
                         if (res.data.flag) {
                             let value = res.data.data.keyValue;
@@ -679,12 +679,13 @@
                 if (children == null) {
                     let index = data.index;
                     let key = data.label;
+                    let base64keyName = data.base64keyName;
                     let serverName = index.split(":")[0];
                     let dbIndex = index.split(":")[1];
                     this.keyType = data.type.toUpperCase();
                     this.keyName = key;
                     this.viewType = 'TEXT';
-                    this.getValue(serverName, dbIndex, key, this.keyType);
+                    this.getValue(serverName, dbIndex, base64keyName, this.keyType);
                 }
             },
             addKey() {

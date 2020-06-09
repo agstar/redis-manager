@@ -2,9 +2,11 @@ package com.redis.manager.handle;
 
 import com.redis.manager.model.RedisKey;
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.Map;
  * @author agstar
  */
 @AllArgsConstructor
+@Component
 public class RedisContextHolder {
     private final HashValueHandler hashValueHandler;
     private final SetValueHandler setValueHandler;

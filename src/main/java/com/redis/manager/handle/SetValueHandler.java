@@ -4,10 +4,11 @@ import com.redis.manager.model.RedisKey;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.Optional;
-
+@Component
 public class SetValueHandler implements RedisValueHandler {
 
     @Override
