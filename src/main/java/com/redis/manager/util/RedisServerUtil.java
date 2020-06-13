@@ -157,9 +157,14 @@ public class RedisServerUtil {
         return stringRedisTemplate;
     }
 
+    /**
+     * @param stringRedisTemplate
+     * @return 初始化连接，缓存key的信息
+     * @author agstar
+     */
     private static List<Integer> initRedisKeysCache(StringRedisTemplate stringRedisTemplate) {
         return stringRedisTemplate.execute((RedisCallback<List<Integer>>) redisConnection -> {
-            Properties info = redisConnection.info();
+            Properties info = redisConnection.info("Keyspace");
             //keys=37,expires=0,avg_ttl=0
             // String keyspace = info.getProperty("db1");
             List<Integer> keyCountList = new ArrayList<>(16);
@@ -191,6 +196,17 @@ public class RedisServerUtil {
         }
     }
 
+    public static StringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {
+        StringRedisTemplate stringRedisTemplate = REDIS_TEMPLATE_MAP.get(serverName + DEFAULT_SEPARATOR + dbIndex);
+        if (stringRedisTemplate != null) {
+            return stringRedisTemplate;
+        }
+        Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
+        if (first.isPresent()) {
+            return RedisServerUtil.initRedisConnection(first.get(), dbIndex);
+        }
+        throw new RuntimeException("初始化StringRedisTemplate失败");
+    }
 
     private static void convertTree(JSONArray json, String parent, JSONArray children) {
         List<Object> parentList = json.stream().filter(x -> {

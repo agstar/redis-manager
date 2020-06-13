@@ -26,7 +26,7 @@ import static com.redis.manager.util.Const.*;
  */
 @RestController
 @AllArgsConstructor
-public class KeyController {
+public class KeyValueController {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
     private final RedisContextHolder redisContextHolder;
 
@@ -81,6 +81,12 @@ public class KeyController {
                            @PathVariable("base64keyName") String base64keyName) {
         StringRedisTemplate stringRedisTemplate = getStringRedisTemplate(serverName, dbIndex);
         Object value = redisContextHolder.getHandler(type).getValue(base64keyName, stringRedisTemplate);
+        return Result.success(value);
+    }
+
+    @GetMapping("value")
+    public Result<Object> getValue(RedisKey redisKey) {
+        Object value = redisContextHolder.getHandler(redisKey.getType()).getValue(redisKey);
         return Result.success(value);
     }
 

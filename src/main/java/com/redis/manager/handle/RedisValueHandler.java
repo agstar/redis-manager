@@ -44,6 +44,8 @@ public interface RedisValueHandler {
         return getValue(redisKey, stringRedisTemplate);
     }
 
-    ;
+    Object getValue(RedisKey redisKey);
+
+
 
 }

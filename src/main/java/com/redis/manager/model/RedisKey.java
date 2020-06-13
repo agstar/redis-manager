@@ -4,9 +4,13 @@ package com.redis.manager.model;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * @author 25414
+ */
 @Data
 @Builder
 public class RedisKey {
+    private String serverName;
     private String keyName;
     private String type;
     /**

@@ -29,9 +29,6 @@ mvn clean package
 
 
 ```
-+ 
-+ Maven打包编译
- `mvn clean package`
 
 当项目完成 后续会考虑docker方式部署 
 
