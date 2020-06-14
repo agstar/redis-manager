@@ -33,4 +33,9 @@ public class HashValueHandler implements RedisValueHandler {
         Optional.empty();
         return null;
     }
+
+    @Override
+    public Object getValue(RedisKey redisKey) {
+        return null;
+    }
 }

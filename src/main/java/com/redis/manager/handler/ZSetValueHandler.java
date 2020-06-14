@@ -10,4 +10,9 @@ public class ZSetValueHandler implements RedisValueHandler{
     public Object getValue(RedisKey redisKey, StringRedisTemplate stringRedisTemplate) {
         return null;
     }
+
+    @Override
+    public Object getValue(RedisKey redisKey) {
+        return null;
+    }
 }

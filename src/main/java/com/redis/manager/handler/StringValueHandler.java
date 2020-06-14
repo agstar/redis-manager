@@ -14,9 +14,13 @@ import java.util.Optional;
  * @author agstar
  */
 @Component
-public class StringValueHandler extends RedisValueHandler {
+public class StringValueHandler implements RedisValueHandler {
 
 
+    @Override
+    public Object getValue(RedisKey redisKey, StringRedisTemplate stringRedisTemplate) {
+        return null;
+    }
 
     @Override
     public Object getValue(RedisKey redisKey) {

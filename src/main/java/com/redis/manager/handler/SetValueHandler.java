@@ -33,4 +33,9 @@ public class SetValueHandler implements RedisValueHandler {
 
         return null;
     }
+
+    @Override
+    public Object getValue(RedisKey redisKey) {
+        return null;
+    }
 }

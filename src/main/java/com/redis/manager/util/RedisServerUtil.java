@@ -83,6 +83,16 @@ public class RedisServerUtil {
             e.printStackTrace();
         }
     }
+    public static  ReactiveStringRedisTemplate getStringRedisTemplate(String serverName, int dbIndex) {
+        ReactiveStringRedisTemplate reactiveStringRedisTemplate = REDIS_TEMPLATE_MAP.get(serverName + DEFAULT_SEPARATOR + dbIndex);
+        if (reactiveStringRedisTemplate == null) {
+            Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(serverName)).findFirst();
+            if (first.isPresent()) {
+                return RedisServerUtil.initRedisConnection(first.get(), dbIndex);
+            }
+        }
+        throw new RuntimeException("初始化StringRedisTemplate失败");
+    }
 
     public static synchronized void updateServer(Long id, RedisServer redisServer) {
         Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getId().equals(id)).findFirst();

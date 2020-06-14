@@ -11,6 +11,11 @@ public class DefaultValueHander  implements RedisValueHandler {
         return null;
     }
 
+    @Override
+    public Object getValue(RedisKey redisKey) {
+        return null;
+    }
+
     /*public Object getValue(String base64keyName,StringRedisTemplate stringRedisTemplate) {
         RedisKey redisKey = getRedisKey(base64keyName, stringRedisTemplate);
 
