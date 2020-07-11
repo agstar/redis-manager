@@ -1,7 +1,6 @@
 package com.redis.manager.controller;
 
 import com.redis.manager.entity.Result;
-import com.redis.manager.entity.StatusCode;
 import com.redis.manager.util.Const;
 import com.redis.manager.util.RedisServerUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -34,22 +33,22 @@ public class ServerController {
     public Result<String> testConnection(@RequestBody RedisServer redisServer) {
         String pong = RedisServerUtil.ping(redisServer);
         if (StringUtils.equalsIgnoreCase(pong, "pong")) {
-            return Result.success(pong);
+            return Result.success(pong, pong);
         }
         return Result.error();
 
     }
 
 
-    @DeleteMapping("server/{id}")
-    public Result<Void> deleteServer(@PathVariable("id") Long id) {
-        RedisServerUtil.deleteServer(id);
+    @DeleteMapping("server/{serverName}")
+    public Result<Void> deleteServer(@PathVariable("serverName") String serverName) {
+        RedisServerUtil.deleteServer(serverName);
         return Result.successMsg("添加成功");
     }
 
-    @PutMapping("server/{id}")
-    public Result<Void> updateServer(@PathVariable() Long id, @RequestBody RedisServer redisServer) {
-        RedisServerUtil.updateServer(id, redisServer);
+    @PutMapping("server/{serverName}")
+    public Result<Void> updateServer(@PathVariable("serverName") String serverName, @RequestBody RedisServer redisServer) {
+        RedisServerUtil.updateServer(serverName, redisServer);
         return Result.successMsg("修改成功");
     }
 

@@ -1,20 +1,17 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.util.RedisServerUtil;
-import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author agstar
@@ -72,6 +69,14 @@ public class HashValueHandler implements RedisValueHandler {
             });
         }
         return null;
+    }
+
+    @Override
+    public void saveKey(RedisKey redisKey) {
+        //根据名称查询
+        StringRedisTemplate stringRedisTemplate = RedisServerUtil
+                .getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
+        stringRedisTemplate.opsForHash().put(redisKey.getKeyName(), redisKey.getHashKey(), redisKey.getKeyValue().toString());
     }
 
     private Object getObject(Cursor<Map.Entry<Object, Object>> entryCursor, long size) {

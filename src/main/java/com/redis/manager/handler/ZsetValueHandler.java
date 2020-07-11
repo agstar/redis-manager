@@ -1,56 +1,31 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.util.RedisServerUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author agstar
  */
 @Component
-public class SetValueHandler implements RedisValueHandler {
+public class ZsetValueHandler implements RedisValueHandler {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
 
     @Override
     public Object getValue(RedisKey redisKey, StringRedisTemplate stringRedisTemplate) {
-        String value = stringRedisTemplate.opsForSet().pop(redisKey.getKeyName());
-        //
-        if (StringUtils.isNotBlank(value)) {
-            Long expire = stringRedisTemplate.getExpire(redisKey.getKeyName());
-            return RedisKey.builder().keyValue(value).ttl(Optional.ofNullable(expire).orElse(-1L)).build();
-        } else {
-            //如果不能直接通过keyname获取值，通过base64编码的key重新获取
-            byte[] byteKeyName = Base64.getDecoder().decode(redisKey.getBase64KeyName());
-            stringRedisTemplate.execute((RedisCallback<RedisKey>) connection -> {
-                byte[] bytes = connection.get(byteKeyName);
-                Long ttl = connection.ttl(byteKeyName);
-                String byteValue = Optional.ofNullable(bytes).map(String::new).orElse(null);
-                return RedisKey.builder().keyValue(byteValue).ttl(Optional.ofNullable(ttl).orElse(-1L)).build();
-            });
-        }
-
-
         return null;
     }
 
     @Override
     public Object getValue(RedisKey redisKey) {
         //根据名称查询
-        StringRedisTemplate stringRedisTemplate = RedisServerUtil.getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
+        /*StringRedisTemplate stringRedisTemplate = RedisServerUtil.getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
         Boolean aBoolean = stringRedisTemplate.hasKey(redisKey.getKeyName());
         boolean exist = Optional.ofNullable(aBoolean).orElse(false);
         if (exist) {
-            Cursor<String> scan = stringRedisTemplate.opsForSet().scan(redisKey.getKeyName(), SCAN_OPTIONS);
+           stringRedisTemplate.opsForZSet().rangeByScoreWithScores()
             Long size = stringRedisTemplate.opsForSet().size(redisKey.getKeyName());
             if (size == null) {
                 return null;
@@ -84,6 +59,15 @@ public class SetValueHandler implements RedisValueHandler {
                 }
                 return null;
             });
-        }
+        }*/
+        return null;
+    }
+
+    @Override
+    public void saveKey(RedisKey redisKey) {
+        //根据名称查询
+        StringRedisTemplate stringRedisTemplate = RedisServerUtil
+                .getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
+        stringRedisTemplate.opsForZSet().add(redisKey.getKeyName(), redisKey.getKeyValue().toString(), redisKey.getScore());
     }
 }

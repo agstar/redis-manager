@@ -1,9 +1,8 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.util.RedisServerUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -50,4 +49,14 @@ public class StringValueHandler implements RedisValueHandler {
             return Optional.ofNullable(bytes).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null);
         });
     }
+
+    @Override
+    public void saveKey(RedisKey redisKey) {
+        //根据名称查询
+        StringRedisTemplate stringRedisTemplate = RedisServerUtil
+                .getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
+        stringRedisTemplate.opsForValue().set(redisKey.getKeyName(), redisKey.getKeyValue().toString());
+    }
+
+
 }

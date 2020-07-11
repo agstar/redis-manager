@@ -1,4 +1,4 @@
-package com.redis.manager.handle;
+package com.redis.manager.handler;
 
 import com.redis.manager.model.RedisKey;
 import com.redis.manager.util.RedisServerUtil;
@@ -10,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,5 +42,13 @@ public class ListValueHandler implements RedisValueHandler {
             return byteList.stream().map(b -> new String(b, StandardCharsets.UTF_8)).collect(Collectors.toList());
         });
 
+    }
+
+    @Override
+    public void saveKey(RedisKey redisKey) {
+        //根据名称查询
+        StringRedisTemplate stringRedisTemplate = RedisServerUtil
+                .getStringRedisTemplate(redisKey.getServerName(), redisKey.getDbIndex());
+        stringRedisTemplate.opsForList().leftPush(redisKey.getKeyName(), redisKey.getKeyValue().toString());
     }
 }

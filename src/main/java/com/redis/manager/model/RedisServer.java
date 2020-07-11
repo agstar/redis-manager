@@ -9,7 +9,6 @@ import lombok.Data;
  */
 @Data
 public class RedisServer {
-    private Long id;
     private String name;
     private String host;
     private int port;

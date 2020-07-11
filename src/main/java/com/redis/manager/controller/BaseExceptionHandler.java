@@ -1,7 +1,6 @@
 package com.redis.manager.controller;
 
 import com.redis.manager.entity.Result;
-import com.redis.manager.entity.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

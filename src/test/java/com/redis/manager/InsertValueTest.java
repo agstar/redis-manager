@@ -21,10 +21,32 @@ import java.util.*;
 
 public class InsertValueTest {
 
-    private String hostname = "121.199.55.159";
+    private String hostname = "192.168.213.128";
     private int dbIndex = 0;
     private int port = 6379;
     private StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+
+    @Before
+    public void setup() {
+        //初始化redis连接
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(hostname);
+        configuration.setPort(port);
+        configuration.setDatabase(dbIndex);
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
+        factory.afterPropertiesSet();
+        stringRedisTemplate.setConnectionFactory(factory);
+        stringRedisTemplate.afterPropertiesSet();
+        factory.getConnection().close();
+    }
+
+    @Test
+    public void insertString() {
+        for (int i = 0; i < 10; i++) {
+            String key = "str" + i;
+            stringRedisTemplate.opsForValue().set(key, key);
+        }
+    }
 
     @Test
     public void insertMap() {
@@ -75,18 +97,5 @@ public class InsertValueTest {
         }
     }
 
-    @Before
-    public void setup() {
-        //初始化redis连接
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(hostname);
-        configuration.setPort(port);
-        configuration.setDatabase(dbIndex);
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(configuration);
-        factory.afterPropertiesSet();
-        stringRedisTemplate.setConnectionFactory(factory);
-        stringRedisTemplate.afterPropertiesSet();
-        factory.getConnection().close();
-    }
 
 }

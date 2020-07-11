@@ -450,7 +450,7 @@
                 this.key.score = null;
                 this.key.keyValue = null;
             },
-            ping() {
+            testConnection() {
                 axios.post('/ping', this.server)
                     .then((response) => {
                         this.$message({

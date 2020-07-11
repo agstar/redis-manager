@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -39,8 +40,8 @@ public class RedisServerUtil {
     /**
      * 存储redis server的文件
      */
-    private static String serverPath = PROJECT_PATH + "/server.json";
-    private static Resource resource = new ClassPathResource(serverPath);
+    private static String serverPath = PROJECT_PATH + File.separator + "server.json";
+    private static Resource resource = new FileSystemResource(serverPath);
 
     /**
      * 将redisServer写入到文件中
@@ -61,9 +62,9 @@ public class RedisServerUtil {
         }
     }
 
-    public static synchronized void deleteServer(Long id) {
+    public static synchronized void deleteServer(String name) {
         try {
-            boolean remove = REDIS_SERVER.removeIf(x -> x.getId().equals(id));
+            boolean remove = REDIS_SERVER.removeIf(x -> x.getName().equals(name));
             if (remove) {
                 File file = resource.getFile();
                 String json = FileUtils.readFileToString(file, CHARACTER);
@@ -77,8 +78,8 @@ public class RedisServerUtil {
         }
     }
 
-    public static synchronized void updateServer(Long id, RedisServer redisServer) {
-        Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getId().equals(id)).findFirst();
+    public static synchronized void updateServer(String name, RedisServer redisServer) {
+        Optional<RedisServer> first = REDIS_SERVER.stream().filter(x -> x.getName().equals(name)).findFirst();
         if (first.isPresent()) {
             RedisServer oldRedisServer = first.get();
             oldRedisServer.setAuth(redisServer.getAuth());
