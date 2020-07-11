@@ -5,24 +5,12 @@ import com.redis.manager.entity.Result;
 import com.redis.manager.handler.KeyHandler;
 import com.redis.manager.handler.RedisContextHolder;
 import com.redis.manager.model.RedisKey;
-import com.redis.manager.model.RedisServer;
-import com.redis.manager.util.RedisServerUtil;
-import com.redis.manager.util.RedisUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
-import org.springframework.data.redis.connection.DataType;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.redis.manager.util.Const.*;
+import java.util.List;
 
 /**
  * @author agstar
