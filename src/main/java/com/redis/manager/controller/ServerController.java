@@ -3,6 +3,9 @@ package com.redis.manager.controller;
 import com.redis.manager.entity.Result;
 import com.redis.manager.util.Const;
 import com.redis.manager.util.RedisServerUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import com.redis.manager.model.RedisServer;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +17,7 @@ import java.util.Set;
 /**
  * @author agstar
  */
+@Api(tags="Server管理")
 @RestController
 public class ServerController {
 
@@ -23,8 +27,9 @@ public class ServerController {
      *
      * @param redisServer 添加的reids服务信息
      */
+    @ApiOperation("添加server")
     @PostMapping("server")
-    public Result<Void> addServer(@RequestBody RedisServer redisServer) {
+    public Result<Void> addServer(@ApiParam("server信息")@RequestBody RedisServer redisServer) {
         RedisServerUtil.addServer(redisServer);
         return Result.successMsg("添加成功");
     }
@@ -32,10 +37,10 @@ public class ServerController {
     @PostMapping("ping")
     public Result<String> testConnection(@RequestBody RedisServer redisServer) {
         String pong = RedisServerUtil.ping(redisServer);
-        if (StringUtils.equalsIgnoreCase(pong, "pong")) {
+        if (StringUtils.equalsIgnoreCase(pong, "PONG")) {
             return Result.success(pong, pong);
         }
-        return Result.error();
+        return Result.errorMsg(pong);
 
     }
 

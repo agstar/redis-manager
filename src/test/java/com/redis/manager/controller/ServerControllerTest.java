@@ -32,8 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ServerControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @LocalServerPort
-    private int port;
     RedisServer redisServer = new RedisServer();
 
     @BeforeEach
@@ -52,7 +50,7 @@ class ServerControllerTest {
     void addServer() throws Exception {
         this.mockMvc.perform(
                 post("/server")
-                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(JSON.toJSONString(redisServer)))
                 .andDo(print())
                 .andExpect(status().isOk())

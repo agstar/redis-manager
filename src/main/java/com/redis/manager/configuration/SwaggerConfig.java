@@ -1,3 +1,4 @@
+/*
 package com.redis.manager.configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -11,12 +12,14 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
+*/
 /**
  * Swagger  Configuration
  *
  * @author agstar
  * @date 2020/7/11 14:44
- */
+ *//*
+
 @Configuration
 @EnableSwagger2WebMvc
 public class SwaggerConfig {
@@ -31,9 +34,11 @@ public class SwaggerConfig {
                 .build();
     }
 
-    /**
+    */
+/**
      * 构建 api文档的详细信息函数,注意这里的注解引用的是哪个
-     */
+     *//*
+
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 //页面标题
@@ -49,4 +54,4 @@ public class SwaggerConfig {
                 .description("API 描述")
                 .build();
     }
-}
+}*/

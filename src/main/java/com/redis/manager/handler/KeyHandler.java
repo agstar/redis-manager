@@ -1,17 +1,14 @@
 package com.redis.manager.handler;
 
 import com.alibaba.fastjson.JSONArray;
-import com.redis.manager.entity.Result;
 import com.redis.manager.model.RedisKey;
-import com.redis.manager.model.RedisServer;
 import com.redis.manager.util.RedisServerUtil;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -23,6 +20,7 @@ import static com.redis.manager.util.Const.REDIS_SERVER;
  * @author agstar
  * @date 2020/7/11 16:05
  */
+@Component
 public class KeyHandler {
     private static final ScanOptions SCAN_OPTIONS = new ScanOptions.ScanOptionsBuilder().match("*").count(10000).build();
 

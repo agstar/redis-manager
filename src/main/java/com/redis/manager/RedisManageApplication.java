@@ -4,11 +4,15 @@ import com.redis.manager.util.RedisServerUtil;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
+/**
+ * @author agstar
+ */
+@EnableOpenApi
 @SpringBootApplication
 public class RedisManageApplication {
 
