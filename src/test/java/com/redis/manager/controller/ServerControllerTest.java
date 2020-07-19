@@ -37,9 +37,9 @@ class ServerControllerTest {
     @BeforeEach
     void setUp() {
 
-        redisServer.setHost("");
-        redisServer.setName("");
-        redisServer.setPort(6397);
+        redisServer.setHost("10.216.127.5");
+        redisServer.setName("10.216.127.5");
+        redisServer.setPort(6379);
     }
 
     @AfterEach
